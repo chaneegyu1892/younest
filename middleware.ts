@@ -5,6 +5,8 @@ const PUBLIC_PATHS = [
   "/",
   "/api/auth/kakao/callback",
   "/api/auth/logout",
+  // M0 PoC: 개발 환경에서만 접근 가능 (app/poc/layout.tsx에서 production 차단)
+  "/poc",
 ];
 
 export async function middleware(request: NextRequest) {
