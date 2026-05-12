@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>younest - 오늘 일기</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#cfbcff",
+                        "on-secondary-fixed-variant": "#4d3d76",
+                        "secondary": "#655590",
+                        "on-primary-fixed": "#3c0701",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#763223",
+                        "on-error": "#ffffff",
+                        "text-tertiary": "#A8A8A8",
+                        "on-surface-variant": "#54433f",
+                        "on-tertiary-container": "#005347",
+                        "inverse-primary": "#ffb4a4",
+                        "on-tertiary-fixed-variant": "#005045",
+                        "surface-container": "#faeae7",
+                        "primary": "#944838",
+                        "on-secondary": "#ffffff",
+                        "text-secondary": "#6B6B6B",
+                        "surface": "#FFFFFF",
+                        "outline-variant": "#dac1bc",
+                        "error-container": "#ffdad6",
+                        "outline": "#87726e",
+                        "primary-fixed-dim": "#ffb4a4",
+                        "surface-container-lowest": "#ffffff",
+                        "private-accent": "#8B7AB8",
+                        "tertiary": "#006b5c",
+                        "surface-container-highest": "#efdfdc",
+                        "primary-fixed": "#ffdad3",
+                        "primary-container": "#ff9f8a",
+                        "border": "#E8E6E1",
+                        "on-background": "#221a18",
+                        "tertiary-container": "#69c9b5",
+                        "on-secondary-container": "#594983",
+                        "on-error-container": "#93000a",
+                        "background": "#FAFAF8",
+                        "tertiary-fixed": "#94f4df",
+                        "surface-container-high": "#f5e5e2",
+                        "warning": "#F4A261",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fff8f6",
+                        "success": "#7FB069",
+                        "inverse-surface": "#372e2c",
+                        "surface-container-low": "#fff0ee",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#78d7c3",
+                        "surface-dim": "#e6d7d4",
+                        "surface-variant": "#efdfdc",
+                        "secondary-fixed-dim": "#cfbcff",
+                        "surface-tint": "#944838",
+                        "sidebar-bg": "#F5F4F1",
+                        "on-surface": "#221a18",
+                        "on-tertiary-fixed": "#00201b",
+                        "secondary-fixed": "#e9ddff",
+                        "on-secondary-fixed": "#200f48",
+                        "on-primary-container": "#793425",
+                        "text-primary": "#1A1A1A",
+                        "inverse-on-surface": "#fdedea"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "sidebar-width": "240px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "container-max": "1440px",
+                        "huge": "64px",
+                        "xxl": "48px"
+                    },
+                    "fontFamily": {
+                        "h1": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "display-mobile": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h1": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "body": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h2": ["18px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "display-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display": ["32px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E8E6E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A8A8A8;
+        }
+    </style>
+</head>
+<body class="bg-background text-primary font-body antialiased flex min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-md w-[240px] z-40 bg-sidebar-bg border-r border-border hidden md:flex">
+<!-- Header -->
+<div class="flex items-center gap-sm mb-xl px-sm cursor-pointer hover:opacity-80 transition-opacity">
+<div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary font-display font-bold">Y</div>
+<div>
+<h1 class="font-display text-h2 font-bold text-primary">younest</h1>
+<p class="font-caption text-caption text-text-tertiary">Personal Sanctuary</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-text-tertiary text-sm">unfold_more</span>
+</div>
+<!-- CTA -->
+<button class="w-full flex items-center justify-center gap-xs bg-surface border border-border rounded-lg py-sm px-md mb-lg hover:bg-surface-container-lowest transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+<span class="material-symbols-outlined text-sm">edit_square</span>
+<span class="font-body text-body font-medium">New Entry</span>
+</button>
+<!-- Main Nav -->
+<nav class="flex-1 flex flex-col gap-xs overflow-y-auto">
+<!-- Inactive Item -->
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-lg">home</span>
+<span class="font-body text-body">Home</span>
+</a>
+<!-- Active Item (Semantic Match for "Diary") -->
+<a class="flex items-center gap-sm px-sm py-xs bg-primary-container text-on-primary-container rounded-lg font-semibold transition-all" href="#">
+<span class="material-symbols-outlined text-lg">SelectionAll</span>
+<span class="font-body text-body">My Nest</span>
+</a>
+<!-- Document Tree under Active Section -->
+<div class="ml-lg mt-xs flex flex-col gap-xs border-l border-border pl-sm">
+<a class="flex items-center gap-sm px-sm py-xs rounded text-primary bg-surface-container-high font-medium" href="#">
+<span class="text-sm">📔</span>
+<span class="font-body text-body">오늘 일기</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-xs rounded text-text-secondary hover:bg-surface-container-high ml-md" href="#">
+<span class="text-sm">🌅</span>
+<span class="font-body text-body">아침</span>
+</a>
+</div>
+<!-- Inactive Items -->
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-text-secondary hover:bg-surface-container-high transition-all mt-sm" href="#">
+<span class="material-symbols-outlined text-lg">lock</span>
+<span class="font-body text-body">Security</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span class="font-body text-body">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[240px] bg-surface min-h-screen flex flex-col relative">
+<!-- Cover Image -->
+<div class="h-[200px] w-full relative group bg-cover bg-center" data-alt="A warm, soft photography shot capturing gentle morning sunlight streaming through a large window. A delicate ceramic coffee cup rests on a clean, light wood surface. The lighting is bright yet diffused, creating a serene, peaceful atmosphere. The color palette features soft whites, warm creams, and gentle honey tones, reflecting a cozy, minimal 'Personal Sanctuary' aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBpZzfEOLuzrXAMhYf44goqcUUJsZ3wmE9Pp1XXWzXLiU4Ix3cWZjJNhH4qVKbMAsD_L2qTY0PLE6UUSJlFlqnCV_95R1Gjm1piYB3YPFh7jf6H-3EtBttEUJi8R1TjBF4YSGNMerPX7EjGJci2xw__XKg7Rke5d-IIMyxAlTLVWYIVoQs2wdDYzAVhGMBCoa_Y9r-4TJPIuOFt2b_insEJXWaR8uPXTKmn3br_3-26_UnCY2BjQ2YMXIiGFTAa5NWuZUUU2m6kAGJh');">
+<!-- Cover Change Button -->
+<button class="absolute bottom-md right-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-surface/90 backdrop-blur-sm border border-border rounded-lg px-md py-xs flex items-center gap-xs shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:bg-surface">
+<span class="material-symbols-outlined text-sm text-text-secondary">image</span>
+<span class="font-body text-body text-text-secondary">커버 변경</span>
+</button>
+</div>
+<!-- Editor Container -->
+<article class="max-w-[760px] w-full mx-auto px-lg md:px-xl py-xl pb-huge flex-1">
+<!-- Header Section -->
+<header class="mb-xl relative group">
+<!-- Top Right Actions -->
+<div class="absolute top-0 right-0 flex items-center gap-sm opacity-0 group-hover:opacity-100 transition-opacity text-text-tertiary">
+<button class="hover:text-private-accent transition-colors"><span class="material-symbols-outlined">lock</span></button>
+<button class="text-primary-container hover:text-primary transition-colors"><span class="material-symbols-outlined fill-icon">star</span></button>
+<button class="hover:text-text-secondary transition-colors"><span class="material-symbols-outlined">more_horiz</span></button>
+</div>
+<!-- Emoji Icon -->
+<div class="text-[64px] leading-none mb-md cursor-pointer hover:bg-surface-container-low inline-block rounded-lg p-xs -ml-xs transition-colors">
+                    📔
+                </div>
+<!-- Title Input -->
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-display text-display text-primary placeholder-text-tertiary mb-xs" placeholder="제목 없는 문서" type="text" value="오늘 일기"/>
+<!-- Metadata -->
+<p class="font-caption text-caption text-text-tertiary">마지막 수정 · 방금 전</p>
+</header>
+<!-- Block Editor -->
+<div class="flex flex-col gap-[2px]">
+<!-- Block 1 (H1) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs">
+<!-- Hover Handles -->
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<h1 class="font-h1 text-h1 text-primary w-full outline-none" contenteditable="true">2026년 5월 12일 화요일</h1>
+</div>
+<!-- Block 2 (P) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs">
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<p class="font-body text-body text-primary w-full outline-none" contenteditable="true">오늘은 회사에서 새로운 프로젝트가 시작되었다. 처음엔 부담스러웠지만 동료들과 함께 이야기 나누면서 조금씩 정리가 되어갔다.</p>
+</div>
+<!-- Block 3 (Callout) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs my-sm">
+<div class="absolute left-0 top-3 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<div class="w-full bg-surface-container-low rounded-lg p-md flex items-start gap-sm border border-transparent hover:border-border transition-colors">
+<span class="text-lg leading-none mt-[2px]">💡</span>
+<p class="font-body text-body text-primary outline-none" contenteditable="true">오늘의 깨달음: 혼자 끙끙대지 말고 빨리 물어보자.</p>
+</div>
+</div>
+<!-- Block 4 (H2) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs mt-md">
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<h2 class="font-h2 text-h2 text-primary w-full outline-none" contenteditable="true">감사한 일들</h2>
+</div>
+<!-- Block 5 (List) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs">
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<ul class="font-body text-body text-primary w-full pl-lg list-disc marker:text-text-tertiary space-y-1 outline-none" contenteditable="true">
+<li>출근길에 만개한 벚꽃을 본 것</li>
+<li>점심에 친한 동료와 맛있는 식사를 한 것</li>
+<li>퇴근 후 조용히 책 읽을 시간이 있었던 것</li>
+</ul>
+</div>
+<!-- Block 6 (Toggle) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs mt-sm">
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<div class="flex items-center gap-sm w-full cursor-pointer hover:bg-surface-container-lowest rounded px-xs -ml-xs transition-colors">
+<span class="material-symbols-outlined text-lg text-text-secondary">arrow_right</span>
+<p class="font-body text-body text-primary outline-none" contenteditable="true">자세한 회사 일 (펼치기)</p>
+</div>
+</div>
+<!-- Block 7 (Image) -->
+<div class="relative group flex flex-col items-start -ml-12 pl-12 py-xs my-md">
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<img class="w-full rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,0.04)] mb-sm max-w-[500px]" data-alt="A soft, atmospheric photograph of an evening city street scene. The lighting is dim and moody, illuminated by warm, blurred streetlights creating gentle bokeh effects. The color palette leans towards deep blues and warm oranges, evoking a calm, introspective mood. The composition is clean and minimalist, fitting a thoughtful journal entry about a peaceful commute home." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvSUXHooyh45lp4HYLNjfKm548Ti31-iCQwcTN896B74McwX8n-PYPw__11QD6NazPHSpymBGf7_dYSvv_OBayrUhYQXVKBtTFAtbr86RrU2uorZAQ7-sBeQHB49MVdJkKwo5Op3M2jeyZPgqqhk_aLWw21W1DeHQz8tcRpq3TgmLGiBy7Yf4T2Uyk0YJRS0JvAO0SnGiNVoB2zVWGWjEs2KdueMD4WmS819KvMBNJMXJg81L-xdcv6SeE-YZfcOCCMjdw7nUgkJR8"/>
+<p class="font-caption text-caption text-text-tertiary w-full text-center max-w-[500px] outline-none" contenteditable="true">퇴근길 풍경</p>
+</div>
+<!-- Block 8 (Placeholder) -->
+<div class="relative group flex items-start -ml-12 pl-12 py-xs mt-sm">
+<div class="absolute left-0 top-1 opacity-0 group-hover:opacity-100 flex items-center gap-[2px] text-text-tertiary cursor-pointer">
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm">add</span>
+<span class="material-symbols-outlined text-lg hover:bg-surface-container-high rounded-sm cursor-grab">drag_indicator</span>
+</div>
+<p class="font-body text-body text-text-tertiary w-full outline-none" contenteditable="true" placeholder="글을 입력하거나, '/'를 눌러 명령어 사용"></p>
+</div>
+</div>
+<!-- Bottom Status -->
+<div class="mt-xxl pt-lg border-t border-border flex justify-end">
+<p class="font-caption text-caption text-text-tertiary">마지막 자동 저장 · 방금 전</p>
+</div>
+</article>
+</main>
+</body></html>

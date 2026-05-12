@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>할 일 보드 - younest</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#78d7c3",
+                        "surface-container-highest": "#efdfdc",
+                        "on-background": "#221a18",
+                        "surface-bright": "#fff8f6",
+                        "surface-tint": "#944838",
+                        "on-secondary-fixed-variant": "#4d3d76",
+                        "private-accent": "#8B7AB8",
+                        "on-error": "#ffffff",
+                        "background": "#FAFAF8",
+                        "surface-container-low": "#fff0ee",
+                        "on-tertiary-fixed": "#00201b",
+                        "warning": "#F4A261",
+                        "secondary-container": "#cfbcff",
+                        "secondary": "#655590",
+                        "on-secondary": "#ffffff",
+                        "sidebar-bg": "#F5F4F1",
+                        "inverse-on-surface": "#fdedea",
+                        "tertiary-fixed": "#94f4df",
+                        "on-secondary-container": "#594983",
+                        "surface-container": "#faeae7",
+                        "text-primary": "#1A1A1A",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#005347",
+                        "tertiary-container": "#69c9b5",
+                        "secondary-fixed-dim": "#cfbcff",
+                        "on-surface": "#221a18",
+                        "primary": "#944838",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#e9ddff",
+                        "on-surface-variant": "#54433f",
+                        "on-primary-container": "#793425",
+                        "primary-fixed": "#ffdad3",
+                        "outline-variant": "#dac1bc",
+                        "success": "#7FB069",
+                        "outline": "#87726e",
+                        "on-tertiary-fixed-variant": "#005045",
+                        "text-tertiary": "#A8A8A8",
+                        "surface-dim": "#e6d7d4",
+                        "on-error-container": "#93000a",
+                        "text-secondary": "#6B6B6B",
+                        "on-secondary-fixed": "#200f48",
+                        "inverse-surface": "#372e2c",
+                        "on-primary-fixed-variant": "#763223",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#3c0701",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#efdfdc",
+                        "border": "#E8E6E1",
+                        "surface-container-high": "#f5e5e2",
+                        "primary-fixed-dim": "#ffb4a4",
+                        "surface": "#FFFFFF",
+                        "primary-container": "#ff9f8a",
+                        "tertiary": "#006b5c",
+                        "inverse-primary": "#ffb4a4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "xxl": "48px",
+                        "xs": "4px",
+                        "container-max": "1440px",
+                        "xl": "32px",
+                        "sidebar-width": "240px",
+                        "huge": "64px"
+                    },
+                    "fontFamily": {
+                        "display-mobile": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "caption": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "body": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display": ["32px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "h1": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h2": ["18px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "body": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .kanban-shadow {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .kanban-shadow-hover:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+            transition: all 0.2s ease-in-out;
+        }
+        /* Custom scrollbar for columns */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dac1bc;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #87726e;
+        }
+    </style>
+</head>
+<body class="bg-background text-text-primary font-body antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar (from JSON) -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full flex-col p-md w-sidebar-width z-40 bg-sidebar-bg border-r border-border flex-shrink-0">
+<div class="mb-xl flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-h2 font-bold overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close up portrait of a young woman smiling gently. Soft, warm natural lighting emphasizing a calm and welcoming atmosphere. The background is slightly blurred and features neutral, light-mode suitable colors, aligning with a cozy and minimal personal sanctuary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgOn_5LmRUki5cdMdWrwt7J3syiG63KH5zxEQmBZUYa0KfouQzIsTejqk1xRNX9GpEtywL_gJaf_Bc_3XAuHBbsPtHHX-m_h27BJ9g7c9br6UncdjJrXzyRXCGeWZm0tT6-Lt3MJHvQgXlK170sPn-aXJ-LeWss16S1rCrwKRL4y7JOtWh2QyEGKA-9DGGJ2ZIbsmQ5oafrAG3X5UQKjVtVa2tvJoQjz9sdheN3wI9bhMbEkkf-rB-JLhDt3t1_upI1AQ9QV87-kqF"/>
+</div>
+<div>
+<h1 class="font-display font-bold text-primary text-h2 leading-none">younest</h1>
+<span class="font-caption text-text-secondary text-caption block mt-xs">Personal Sanctuary</span>
+</div>
+</div>
+<button class="w-full bg-surface text-text-primary font-body text-body py-sm px-md rounded-lg border border-border shadow-sm flex items-center justify-center space-x-2 hover:bg-surface-container-highest transition-colors mb-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add</span>
+<span>New Entry</span>
+</button>
+<ul class="space-y-sm flex-1">
+<li>
+<a class="flex items-center space-x-3 px-md py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-body text-body">Home</span>
+</a>
+</li>
+<li>
+<a class="flex items-center space-x-3 px-md py-sm rounded-lg bg-primary-container text-on-primary-container font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">SelectionAll</span>
+<span class="font-body text-body">My Nest</span>
+</a>
+</li>
+<li>
+<a class="flex items-center space-x-3 px-md py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">lock</span>
+<span class="font-body text-body">Security</span>
+</a>
+</li>
+<li>
+<a class="flex items-center space-x-3 px-md py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-body text-body">Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full ml-0 md:ml-[240px] bg-background relative w-full">
+<!-- Header -->
+<header class="px-xl py-lg flex items-center justify-between sticky top-0 bg-background/90 backdrop-blur-sm z-30">
+<div class="flex items-center space-x-sm">
+<span class="text-h1">📊</span>
+<h2 class="font-h1 text-h1 text-text-primary">할 일 보드</h2>
+</div>
+<div class="flex items-center space-x-sm">
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-highest flex items-center justify-center text-text-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-highest flex items-center justify-center text-text-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- View Tabs -->
+<div class="px-xl border-b border-border mb-lg overflow-x-auto">
+<div class="flex space-x-lg min-w-max">
+<button class="pb-sm text-text-secondary hover:text-text-primary transition-colors font-body text-body flex items-center space-x-xs">
+<span>📋</span> <span>테이블</span>
+</button>
+<button class="pb-sm text-text-primary border-b-2 border-primary font-body text-body font-medium flex items-center space-x-xs">
+<span>🗂️</span> <span>칸반</span>
+</button>
+<button class="pb-sm text-text-secondary hover:text-text-primary transition-colors font-body text-body flex items-center space-x-xs">
+<span>🖼️</span> <span>갤러리</span>
+</button>
+<button class="pb-sm text-text-secondary hover:text-text-primary transition-colors font-body text-body flex items-center space-x-xs">
+<span>📅</span> <span>캘린더</span>
+</button>
+<button class="pb-sm text-text-secondary hover:text-text-primary transition-colors font-body text-body flex items-center space-x-xs">
+<span>📝</span> <span>리스트</span>
+</button>
+</div>
+</div>
+<!-- Kanban Board Area -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden px-xl pb-xl">
+<div class="flex space-x-lg h-full min-w-max items-start">
+<!-- Column 1: 할 일 -->
+<div class="w-[320px] flex flex-col h-full">
+<div class="flex items-center justify-between mb-sm px-sm">
+<div class="flex items-center space-x-sm">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<h3 class="font-body font-medium text-text-primary">할 일</h3>
+<span class="text-text-tertiary font-caption text-caption">2</span>
+</div>
+<button class="text-text-secondary hover:text-text-primary"><span class="material-symbols-outlined text-[18px]">add</span></button>
+</div>
+<div class="flex-1 overflow-y-auto space-y-sm p-xs">
+<!-- Card 1 -->
+<div class="bg-surface rounded-lg p-md kanban-shadow kanban-shadow-hover border border-border cursor-pointer group">
+<div class="flex items-start justify-between mb-sm">
+<h4 class="font-body text-body text-text-primary leading-tight group-hover:text-primary transition-colors">카카오 OAuth 등록</h4>
+<span class="material-symbols-outlined text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity text-[16px] cursor-grab">drag_indicator</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-md">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Development</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Backend</span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-container-highest pt-sm">
+<div class="flex items-center space-x-xs text-text-tertiary">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+<span class="font-caption text-caption">Nov 12</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-warning/20 text-[#D97706] font-caption text-[10px] font-medium">High</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface rounded-lg p-md kanban-shadow kanban-shadow-hover border border-border cursor-pointer group">
+<div class="flex items-start justify-between mb-sm">
+<h4 class="font-body text-body text-text-primary leading-tight group-hover:text-primary transition-colors">데이터베이스 스키마 설계</h4>
+<span class="material-symbols-outlined text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity text-[16px] cursor-grab">drag_indicator</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-md">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Architecture</span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-container-highest pt-sm">
+<div class="flex items-center space-x-xs text-text-tertiary">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+<span class="font-caption text-caption">Nov 14</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-warning/20 text-[#D97706] font-caption text-[10px] font-medium">High</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: 진행중 -->
+<div class="w-[320px] flex flex-col h-full">
+<div class="flex items-center justify-between mb-sm px-sm">
+<div class="flex items-center space-x-sm">
+<div class="w-2 h-2 rounded-full bg-warning"></div>
+<h3 class="font-body font-medium text-text-primary">진행중</h3>
+<span class="text-text-tertiary font-caption text-caption">1</span>
+</div>
+<button class="text-text-secondary hover:text-text-primary"><span class="material-symbols-outlined text-[18px]">add</span></button>
+</div>
+<div class="flex-1 overflow-y-auto space-y-sm p-xs">
+<!-- Card 3 -->
+<div class="bg-surface rounded-lg p-md kanban-shadow kanban-shadow-hover border border-border cursor-pointer group">
+<div class="flex items-start justify-between mb-sm">
+<h4 class="font-body text-body text-text-primary leading-tight group-hover:text-primary transition-colors">Figma 가이드 작성</h4>
+<span class="material-symbols-outlined text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity text-[16px] cursor-grab">drag_indicator</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-md">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Design</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Documentation</span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-container-highest pt-sm">
+<div class="flex items-center space-x-xs text-text-tertiary">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+<span class="font-caption text-caption">Nov 10</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-text-secondary font-caption text-[10px] font-medium">Medium</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3: 완료 -->
+<div class="w-[320px] flex flex-col h-full">
+<div class="flex items-center justify-between mb-sm px-sm">
+<div class="flex items-center space-x-sm">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<h3 class="font-body font-medium text-text-primary">완료</h3>
+<span class="text-text-tertiary font-caption text-caption">2</span>
+</div>
+<button class="text-text-secondary hover:text-text-primary"><span class="material-symbols-outlined text-[18px]">add</span></button>
+</div>
+<div class="flex-1 overflow-y-auto space-y-sm p-xs opacity-75">
+<!-- Card 4 -->
+<div class="bg-surface rounded-lg p-md kanban-shadow kanban-shadow-hover border border-border cursor-pointer group">
+<div class="flex items-start justify-between mb-sm">
+<h4 class="font-body text-body text-text-secondary line-through leading-tight group-hover:text-primary transition-colors">PRD v0.3 작성</h4>
+<span class="material-symbols-outlined text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity text-[16px] cursor-grab">drag_indicator</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-md">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Product</span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-container-highest pt-sm">
+<div class="flex items-center space-x-xs text-text-tertiary">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+<span class="font-caption text-caption">Nov 08</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-text-secondary font-caption text-[10px] font-medium">Medium</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface rounded-lg p-md kanban-shadow kanban-shadow-hover border border-border cursor-pointer group">
+<div class="flex items-start justify-between mb-sm">
+<h4 class="font-body text-body text-text-secondary line-through leading-tight group-hover:text-primary transition-colors">BlockNote PoC</h4>
+<span class="material-symbols-outlined text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity text-[16px] cursor-grab">drag_indicator</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-md">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Research</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-caption text-caption border border-surface-container-high">Editor</span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-container-highest pt-sm">
+<div class="flex items-center space-x-xs text-text-tertiary">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+<span class="font-caption text-caption">Nov 05</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-warning/20 text-[#D97706] font-caption text-[10px] font-medium">High</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Add Column Button -->
+<div class="w-[320px] flex-shrink-0 pt-lg pr-lg">
+<button class="w-full flex items-center justify-center space-x-sm py-sm rounded-lg border border-dashed border-outline-variant text-text-secondary hover:text-text-primary hover:border-outline hover:bg-surface-container-lowest transition-all bg-transparent">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="font-body text-body">Add Column</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

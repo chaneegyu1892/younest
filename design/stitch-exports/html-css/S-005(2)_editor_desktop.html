@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>오늘 일기 - younest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#005045",
+                        "surface-container-high": "#f5e5e2",
+                        "on-error": "#ffffff",
+                        "sidebar-bg": "#F5F4F1",
+                        "secondary": "#655590",
+                        "success": "#7FB069",
+                        "tertiary-container": "#69c9b5",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#3c0701",
+                        "background": "#FAFAF8",
+                        "tertiary-fixed": "#94f4df",
+                        "primary-fixed-dim": "#ffb4a4",
+                        "surface-dim": "#e6d7d4",
+                        "primary-fixed": "#ffdad3",
+                        "secondary-fixed-dim": "#cfbcff",
+                        "inverse-on-surface": "#fdedea",
+                        "surface-container-low": "#fff0ee",
+                        "border": "#E8E6E1",
+                        "text-primary": "#1A1A1A",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#006b5c",
+                        "secondary-container": "#cfbcff",
+                        "text-tertiary": "#A8A8A8",
+                        "on-surface-variant": "#54433f",
+                        "on-background": "#221a18",
+                        "warning": "#F4A261",
+                        "on-primary-container": "#793425",
+                        "primary": "#944838",
+                        "on-primary-fixed-variant": "#763223",
+                        "secondary-fixed": "#e9ddff",
+                        "on-tertiary-container": "#005347",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#efdfdc",
+                        "surface": "#FFFFFF",
+                        "on-secondary-fixed": "#200f48",
+                        "on-secondary": "#ffffff",
+                        "text-secondary": "#6B6B6B",
+                        "tertiary-fixed-dim": "#78d7c3",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#594983",
+                        "surface-container-highest": "#efdfdc",
+                        "primary-container": "#ff9f8a",
+                        "surface-container": "#faeae7",
+                        "inverse-primary": "#ffb4a4",
+                        "outline": "#87726e",
+                        "inverse-surface": "#372e2c",
+                        "error": "#ba1a1a",
+                        "on-surface": "#221a18",
+                        "on-tertiary-fixed": "#00201b",
+                        "surface-tint": "#944838",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#4d3d76",
+                        "private-accent": "#8B7AB8",
+                        "surface-bright": "#fff8f6",
+                        "outline-variant": "#dac1bc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "sidebar-width": "240px",
+                        "container-max": "1440px",
+                        "xxl": "48px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "huge": "64px"
+                    },
+                    "fontFamily": {
+                        "h1": ["Plus Jakarta Sans"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "caption": ["Inter"],
+                        "body": ["Inter"],
+                        "display-mobile": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "h1": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "h2": ["18px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display": ["32px", { "lineHeight": "1.3", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .block-row:hover .drag-handle { opacity: 1; }
+        .drag-handle { opacity: 0; transition: opacity 0.2s ease-in-out; }
+    </style>
+</head>
+<body class="bg-background text-text-primary font-body text-body min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-md w-[240px] z-40 bg-sidebar-bg border-r border-border hidden md:flex">
+<!-- Header -->
+<div class="flex items-center gap-sm mb-lg">
+<img alt="User Profile" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuRquatnYIqcq7IuI9GjObycIGNsYDwLNDTuGiYqbyB9lviZTz7d8ju1QcNot30XvYoGSlEDEmNxS5fI7ReCSPydi1kDEuwZnEpePM08l1QYatBT1oNyzS-4A_2hOhneAV0n1U8-9eR_37hGR9Cyx_h_zWZSSaQoBd20p3ChytGwoagYYQNxJE8UrzngvD092BWl1OrdEH2bSnhQjCLNl-WpqARWIrGnMjnxSV8_VKtDDvPn1QzveiH0DMBMJUROrDMm1ZxBzDxmXj"/>
+<div>
+<h1 class="font-display text-h2 font-bold text-primary">younest</h1>
+<p class="font-caption text-caption text-text-secondary">Personal Sanctuary</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 overflow-y-auto space-y-xs">
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span>Home</span>
+</a>
+<div class="mt-md mb-xs px-sm font-caption text-caption text-text-tertiary uppercase tracking-wider">Workspace</div>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span>📝</span>
+<span>All Notes</span>
+</a>
+<!-- Active Page & Nested -->
+<div class="mt-sm">
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg bg-primary-container text-on-primary-container font-semibold transition-all" href="#">
+<span>📔</span>
+<span>오늘 일기</span>
+</a>
+<div class="ml-[28px] mt-xs pl-sm border-l border-border space-y-xs">
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span>🌅</span>
+<span>아침</span>
+</a>
+</div>
+</div>
+<div class="mt-md mb-xs px-sm font-caption text-caption text-text-tertiary uppercase tracking-wider">System</div>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">lock</span>
+<span>Security</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-text-secondary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<!-- Bottom CTA -->
+<div class="mt-auto pt-md border-t border-border">
+<button class="w-full flex items-center justify-center gap-xs bg-surface text-text-primary border border-border rounded-lg py-sm font-body text-body hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Entry
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 md:ml-[240px] h-screen overflow-y-auto bg-background relative">
+<!-- Cover Image -->
+<div class="w-full h-[200px] relative">
+<img alt="Cover" class="w-full h-full object-cover" data-alt="A warm, bright morning scene featuring a steaming cup of coffee resting on an open journal on a rustic wooden table. Soft morning sunlight streams through a nearby window, casting gentle shadows and creating a cozy, serene atmosphere. The overall palette features warm earthy tones, soft whites, and gentle amber lighting, perfectly embodying a calm, personal sanctuary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg_9nCe5mlJoICu5gYXMUo4_H3xr9qbVeP1wIH8HJSR0a8E4qes1UNFcyalfEwAR8slxI6C9GNbxPzg0ZcGM4x1un1GlwIEohhD8YQqWpwPU4kiaazpce7Hj3boMKyscnnIppB78PSMihmHPm0wEIMJXPl5uLEAL-k6lX_7xDrvxS0ljy-zEh49gfI85T14-5LLHqtapxTceDms2Y1ThqK0u7t1m4OZB9GX8ezAg_J5de_Dhjj3dFknj9yVIAln_Y55ts6ZhB0MlVQ"/>
+</div>
+<!-- Page Content Container -->
+<div class="max-w-[760px] mx-auto px-lg md:px-xl pb-huge relative -mt-[48px]">
+<!-- Page Header -->
+<header class="mb-xl relative">
+<!-- Emoji Icon -->
+<div class="text-[64px] leading-none mb-sm bg-background inline-block rounded-lg p-xs">
+                    📔
+                </div>
+<!-- Top Right Actions -->
+<div class="absolute top-[60px] right-0 flex items-center gap-sm">
+<button class="p-xs text-private-accent hover:bg-surface-container-high rounded transition-colors" title="Private">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lock</span>
+</button>
+<button class="p-xs text-primary hover:bg-surface-container-high rounded transition-colors" title="Favorite">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="p-xs text-text-tertiary hover:bg-surface-container-high rounded transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Title & Meta -->
+<h1 class="font-display text-display text-text-primary mb-xs focus:outline-none" contenteditable="true" spellcheck="false">오늘 일기</h1>
+<p class="font-caption text-caption text-text-tertiary flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+                    마지막 수정 · 방금 전
+                </p>
+</header>
+<!-- Block Editor Area -->
+<div class="space-y-sm">
+<!-- Heading Block -->
+<div class="block-row flex items-start -ml-xl relative group">
+<div class="drag-handle w-xl flex justify-center pt-xs text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 font-h1 text-h1 text-text-primary focus:outline-none" contenteditable="true">
+                        새로운 시작
+                    </div>
+</div>
+<!-- Text Block -->
+<div class="block-row flex items-start -ml-xl relative group">
+<div class="drag-handle w-xl flex justify-center pt-xs text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 font-body text-body text-text-secondary leading-relaxed focus:outline-none min-h-[24px]" contenteditable="true">
+                        오늘은 일찍 일어나서 커피를 내렸다. 창밖으로 들어오는 아침 햇살이 기분 좋다. 이번 주는 중요한 미팅이 많으니 마음의 준비를 단단히 해야겠다.
+                    </div>
+</div>
+<!-- Callout Block -->
+<div class="block-row flex items-start -ml-xl relative group mt-md mb-md">
+<div class="drag-handle w-xl flex justify-center pt-xs text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 bg-surface-container-low rounded-lg p-md flex gap-sm border border-border">
+<span class="text-[20px] leading-none mt-xs">💡</span>
+<div class="flex-1 font-body text-body text-text-primary focus:outline-none" contenteditable="true">
+                            잊지 말 것: 오후 3시 디자인 리뷰 미팅 준비하기.
+                        </div>
+</div>
+</div>
+<!-- Divider -->
+<div class="block-row flex items-center -ml-xl relative group py-sm">
+<div class="drag-handle w-xl flex justify-center text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 border-t border-border"></div>
+</div>
+<!-- Subheading -->
+<div class="block-row flex items-start -ml-xl relative group">
+<div class="drag-handle w-xl flex justify-center pt-xs text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 font-h2 text-h2 text-text-primary mt-sm mb-xs focus:outline-none" contenteditable="true">
+                        할 일 목록
+                    </div>
+</div>
+<!-- Todo Blocks -->
+<div class="block-row flex items-start -ml-xl relative group">
+<div class="drag-handle w-xl flex justify-center pt-[2px] text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 flex items-start gap-sm">
+<input checked="" class="mt-[4px] rounded border-border text-primary focus:ring-primary focus:ring-offset-0 bg-transparent w-4 h-4 cursor-pointer" type="checkbox"/>
+<div class="font-body text-body text-text-tertiary line-through focus:outline-none" contenteditable="true">
+                            이메일 확인 및 회신
+                        </div>
+</div>
+</div>
+<div class="block-row flex items-start -ml-xl relative group">
+<div class="drag-handle w-xl flex justify-center pt-[2px] text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 flex items-start gap-sm">
+<input class="mt-[4px] rounded border-border text-primary focus:ring-primary focus:ring-offset-0 bg-transparent w-4 h-4 cursor-pointer" type="checkbox"/>
+<div class="font-body text-body text-text-secondary focus:outline-none" contenteditable="true">
+                            UI 디자인 시안 업데이트
+                        </div>
+</div>
+</div>
+<!-- Empty Slash Command Block -->
+<div class="block-row flex items-start -ml-xl relative group mt-lg">
+<div class="drag-handle w-xl flex justify-center pt-xs text-text-tertiary cursor-grab">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex-1 flex items-center gap-sm">
+<button class="w-6 h-6 flex items-center justify-center text-text-tertiary hover:bg-surface-container-high hover:text-text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+<div class="flex-1 font-body text-body text-text-tertiary italic focus:outline-none min-h-[24px]" contenteditable="true" data-placeholder="명령어를 사용하려면 '/'를 입력하세요...">
+                            명령어를 사용하려면 '/'를 입력하세요...
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

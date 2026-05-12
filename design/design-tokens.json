@@ -1,0 +1,58 @@
+{
+  "colors": {
+    "primary": "#FF9F8A",
+    "primaryHover": "#FF8B73",
+    "private": "#8B7AB8",
+    "background": "#FAFAF8",
+    "surface": "#FFFFFF",
+    "sidebar": "#F5F4F1",
+    "border": "#E8E6E1",
+    "text": {
+      "primary": "#1A1A1A",
+      "secondary": "#6B6B6B",
+      "tertiary": "#A8A8A8"
+    },
+    "status": {
+      "success": "#7FB069",
+      "warning": "#F4A261",
+      "error": "#E76F51"
+    }
+  },
+  "spacing": {
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "6": "24px",
+    "8": "32px",
+    "12": "48px",
+    "16": "64px"
+  },
+  "borderRadius": {
+    "sm": "6px",
+    "md": "10px",
+    "lg": "16px",
+    "full": "9999px"
+  },
+  "typography": {
+    "fontFamily": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+    "sizes": {
+      "display": "32px",
+      "h1": "24px",
+      "h2": "18px",
+      "body": "14px",
+      "caption": "12px"
+    },
+    "weights": {
+      "regular": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    }
+  },
+  "shadows": {
+    "card": "0 1px 3px rgba(0,0,0,0.04)",
+    "modal": "0 10px 40px rgba(0,0,0,0.08)",
+    "floating": "0 4px 12px rgba(0,0,0,0.06)"
+  }
+}
