@@ -29,13 +29,33 @@ export function generateRandomToken(byteLength = 32): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export function buildKakaoAuthorizeUrl(params: {
+/**
+ * SHA-256(raw) → hex. OIDC nonce를 카카오에 보낼 때 사용.
+ *
+ * 패턴 (Supabase signInWithIdToken 호환):
+ * 1. raw nonce 생성 → 쿠키에 저장
+ * 2. SHA-256(raw) hex → 카카오 authorize URL의 nonce 파라미터
+ * 3. 카카오가 id_token.nonce 클레임에 해시값 포함
+ * 4. signInWithIdToken({nonce: raw}) → Supabase가 SHA-256(raw) 후 id_token nonce와 비교
+ */
+export async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
+}
+
+export async function buildKakaoAuthorizeUrl(params: {
   redirectUri: string;
   state: string;
-  nonce: string;
-}): string {
+  /** raw nonce — 함수 내부에서 SHA-256 해시 후 URL에 포함 */
+  rawNonce: string;
+}): Promise<string> {
   const clientId = process.env.KAKAO_REST_API_KEY;
   if (!clientId) throw new Error("KAKAO_REST_API_KEY 환경변수가 비어있습니다.");
+
+  const hashedNonce = await sha256Hex(params.rawNonce);
 
   const url = new URL(KAKAO_AUTHORIZE_URL);
   url.searchParams.set("client_id", clientId);
@@ -44,7 +64,7 @@ export function buildKakaoAuthorizeUrl(params: {
   // openid: OIDC id_token 발급 / profile_nickname: 닉네임 동의 (account_email 명시 제외)
   url.searchParams.set("scope", "openid profile_nickname");
   url.searchParams.set("state", params.state);
-  url.searchParams.set("nonce", params.nonce);
+  url.searchParams.set("nonce", hashedNonce);
   return url.toString();
 }
 

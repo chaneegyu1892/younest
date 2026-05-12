@@ -17,10 +17,16 @@ const COOKIE_MAX_AGE_SEC = 600; // OAuth round-trip 여유 10분
  */
 export async function GET(request: NextRequest) {
   const state = generateRandomToken();
-  const nonce = generateRandomToken();
+  const rawNonce = generateRandomToken();
   const redirectUri = `${request.nextUrl.origin}/auth/callback`;
 
-  const authorizeUrl = buildKakaoAuthorizeUrl({ redirectUri, state, nonce });
+  // raw nonce는 쿠키에 저장, 카카오에는 SHA-256(raw) hex를 전달.
+  // 콜백에서 signInWithIdToken({nonce: raw}) 호출 시 Supabase가 내부에서 다시 해시.
+  const authorizeUrl = await buildKakaoAuthorizeUrl({
+    redirectUri,
+    state,
+    rawNonce,
+  });
   const response = NextResponse.redirect(authorizeUrl);
 
   const isProduction = process.env.NODE_ENV === "production";
@@ -32,7 +38,7 @@ export async function GET(request: NextRequest) {
     path: "/",
   };
   response.cookies.set(STATE_COOKIE, state, cookieOpts);
-  response.cookies.set(NONCE_COOKIE, nonce, cookieOpts);
+  response.cookies.set(NONCE_COOKIE, rawNonce, cookieOpts);
 
   return response;
 }
