@@ -11,11 +11,17 @@ interface UpsertResult {
 
 /**
  * Supabase auth.users에 로그인한 사용자를 public.users에 upsert.
- * 신규 사용자: status='pending', nickname=null, kakao_id 추출, ADMIN_KAKAO_IDS 매칭 시 is_admin=true.
- * 기존 사용자: 변경 없이 현재 row 반환.
+ *
+ * 신규 사용자: status='pending', nickname=null. ADMIN_KAKAO_IDS 매칭 시 is_admin=true + status='approved'.
+ *
+ * 기존 사용자: ADMIN_KAKAO_IDS와 is_admin을 매 로그인마다 동기화.
+ *   - kakao_id가 env에 있는데 is_admin=false → is_admin=true로 promote
+ *     + status='pending'(폼 미작성 외)이었다면 'approved'로 승격
+ *   - kakao_id가 env에 없는데 is_admin=true → is_admin=false로 demote (status는 유지)
+ *   - rejected/banned 사용자는 status 자동 승격 안 됨 (어드민 명시 결정 존중)
  *
  * 호출 위치: app/auth/callback/route.ts (콜백 직후).
- * service-role 사용 — RLS 우회 필수 (users INSERT는 일반 session으로 차단됨).
+ * service-role 사용 — RLS 우회 필수.
  */
 export async function upsertUserAfterAuth(authUser: User): Promise<UpsertResult> {
   const admin = createSupabaseAdminClient();
@@ -27,6 +33,8 @@ export async function upsertUserAfterAuth(authUser: User): Promise<UpsertResult>
     );
   }
 
+  const envIsAdmin = isAdminKakaoId(kakaoId);
+
   // 기존 row 조회
   const { data: existing } = await admin
     .from("users")
@@ -35,6 +43,34 @@ export async function upsertUserAfterAuth(authUser: User): Promise<UpsertResult>
     .maybeSingle();
 
   if (existing) {
+    // ADMIN_KAKAO_IDS 동기화
+    const needsAdminFlip = existing.is_admin !== envIsAdmin;
+    // promote 시 pending → approved 자동 승격 (rejected/banned는 유지)
+    const shouldAutoApprove =
+      envIsAdmin && existing.status === "pending";
+    const newStatus = shouldAutoApprove ? "approved" : existing.status;
+
+    if (needsAdminFlip || shouldAutoApprove) {
+      const { data: updated, error: updateError } = await admin
+        .from("users")
+        .update({ is_admin: envIsAdmin, status: newStatus })
+        .eq("id", authUser.id)
+        .select("id, kakao_id, nickname, status, is_admin")
+        .single();
+      if (updateError || !updated) {
+        throw new Error(
+          `users UPDATE 실패 (admin sync): ${updateError?.message ?? "unknown"}`,
+        );
+      }
+      return {
+        isNewUser: false,
+        kakaoId: updated.kakao_id,
+        nickname: updated.nickname,
+        status: updated.status,
+        isAdmin: updated.is_admin,
+      };
+    }
+
     return {
       isNewUser: false,
       kakaoId: existing.kakao_id,
@@ -45,15 +81,14 @@ export async function upsertUserAfterAuth(authUser: User): Promise<UpsertResult>
   }
 
   // 신규 INSERT
-  const isAdmin = isAdminKakaoId(kakaoId);
   const { data: inserted, error } = await admin
     .from("users")
     .insert({
       id: authUser.id,
       kakao_id: kakaoId,
       nickname: null,
-      status: isAdmin ? "approved" : "pending",
-      is_admin: isAdmin,
+      status: envIsAdmin ? "approved" : "pending",
+      is_admin: envIsAdmin,
     })
     .select("id, kakao_id, nickname, status, is_admin")
     .single();
