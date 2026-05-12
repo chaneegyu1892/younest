@@ -33,7 +33,7 @@ export function SidebarMobile({ userName }: SidebarMobileProps) {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="w-[280px] border-r border-border bg-sidebar p-0"
+          className="flex w-[280px] flex-col border-r border-border bg-sidebar p-0"
         >
           <SheetHeader className="border-b border-border px-4 py-4">
             <SheetTitle asChild>

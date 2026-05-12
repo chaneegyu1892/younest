@@ -10,7 +10,7 @@ interface SidebarProps {
  */
 export function Sidebar({ userName }: SidebarProps) {
   return (
-    <aside className="hidden w-[240px] flex-shrink-0 flex-col border-r border-border bg-sidebar md:flex">
+    <aside className="sticky top-0 hidden h-screen w-[240px] flex-shrink-0 flex-col border-r border-border bg-sidebar md:flex">
       <div className="px-4 py-6">
         <Link
           href="/dashboard"
