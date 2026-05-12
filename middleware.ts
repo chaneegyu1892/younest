@@ -4,6 +4,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 const PUBLIC_PATHS = [
   "/",
   "/auth/callback",
+  "/api/auth/kakao/start",
   "/api/auth/logout",
   // M0 PoC: 개발 환경에서만 접근 가능 (app/poc/layout.tsx에서 production 차단)
   "/poc",
