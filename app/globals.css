@@ -2,10 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  background-color: theme("colors.background");
-  color: theme("colors.text-primary");
-  -webkit-font-smoothing: antialiased;
-  font-family: theme("fontFamily.sans");
+@layer base {
+  :root {
+    /* shadcn 변수를 younest 디자인 토큰 HSL 값으로 덮어씀 */
+    /* HEX→HSL 매핑은 design/design-tokens.json 참조 */
+
+    /* 배경 / 표면 */
+    --background: 60 14% 97%; /* #FAFAF8 */
+    --foreground: 0 0% 10%; /* #1A1A1A (text-primary) */
+
+    --card: 0 0% 100%; /* #FFFFFF (surface) */
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    /* 브랜드 */
+    --primary: 10 100% 77%; /* #FF9F8A coral */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 17% 95%; /* #F5F4F1 sidebar */
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 45 17% 95%;
+    --muted-foreground: 0 0% 42%; /* #6B6B6B text-secondary */
+
+    --accent: 260 28% 60%; /* #8B7AB8 private (비공개 보라) */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 11 75% 62%; /* #E76F51 error */
+    --destructive-foreground: 0 0% 100%;
+
+    /* 경계 / 포커스 */
+    --border: 40 14% 90%; /* #E8E6E1 */
+    --input: 40 14% 90%;
+    --ring: 10 100% 77%; /* primary 색으로 포커스 링 */
+
+    /* 반경 — design-tokens.json md (10px = 0.625rem) */
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  html,
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    font-family: theme("fontFamily.sans");
+  }
 }
