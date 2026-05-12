@@ -17,6 +17,9 @@ export function KakaoLoginButton() {
       provider: "kakao",
       options: {
         redirectTo: `${origin}/auth/callback`,
+        // 카카오 개인 앱은 account_email 권한이 없음 (비즈 앱 전환 시 가능).
+        // Supabase 기본 scope("profile_nickname account_email")를 닉네임만으로 명시 override.
+        scopes: "profile_nickname",
       },
     });
 
