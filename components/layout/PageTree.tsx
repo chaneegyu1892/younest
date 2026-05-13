@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useOptimistic, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { buildTree } from "@/lib/pages/tree";
 import { reduceTree } from "@/lib/pages/reducer";
@@ -10,10 +10,12 @@ import {
   saveExpandedIds,
   toggleExpanded,
 } from "@/lib/pages/expanded-state";
-import { createPage, renamePage, toggleFavorite, setPageIcon, movePage } from "@/lib/actions/pages";
+import { createPage, renamePage, toggleFavorite, setPageIcon, movePage, softDeletePage, restorePage } from "@/lib/actions/pages";
+import { collectDescendantIds } from "@/lib/pages/tree";
 import type { PageNode, OptimisticMutation } from "@/lib/pages/types";
 import { PageTreeNode } from "./PageTreeNode";
 import { MovePageModal } from "./MovePageModal";
+import { DeleteConfirmModal } from "./DeleteConfirmModal";
 
 interface Props {
   pages: PageNode[];
@@ -27,6 +29,7 @@ interface Props {
  */
 export function PageTree({ pages }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [optimistic, applyOptimistic] = useOptimistic(
     pages,
@@ -35,6 +38,12 @@ export function PageTree({ pages }: Props) {
   );
   const [, startTransition] = useTransition();
   const [movingId, setMovingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // 삭제 모달에 표시할 하위 페이지 수 (자기 자신 제외)
+  const deletingChildren = deletingId
+    ? collectDescendantIds(optimistic, deletingId).length - 1
+    : 0;
 
   // SSR 안전: 마운트 후에만 localStorage 읽기
   useEffect(() => {
@@ -93,8 +102,49 @@ export function PageTree({ pages }: Props) {
     });
   };
 
-  // Delete는 T19에서 모달 추가하면서 와이어링 예정. 우선 빈 함수.
-  const onDelete = (_id: string) => { /* T19 */ };
+  /**
+   * 소프트 삭제 실행. 낙관적 업데이트 후 서버 액션 호출.
+   * 성공 시 5초짜리 Undo 토스트를 띄운다.
+   */
+  const performDelete = (id: string) => {
+    // 현재 보고 있는 페이지가 삭제 대상이면 대시보드로 이동
+    if (pathname === `/p/${id}`) router.push("/dashboard");
+
+    startTransition(async () => {
+      const localIds = collectDescendantIds(optimistic, id);
+      applyOptimistic({ kind: "softDelete", deletedIds: localIds });
+      const res = await softDeletePage(id);
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      const deletedIds = res.data.deletedIds;
+      toast.success("휴지통으로 이동했어요", {
+        duration: 5000,
+        action: {
+          label: "실행 취소",
+          onClick: async () => {
+            const undo = await restorePage(deletedIds);
+            if (!undo.ok) toast.error(undo.error);
+          },
+        },
+      });
+    });
+  };
+
+  /**
+   * 삭제 요청 진입점.
+   * - 하위 페이지가 없으면 바로 삭제.
+   * - 하위 페이지가 있으면 확인 모달을 띄운다.
+   */
+  const onDelete = (id: string) => {
+    const childCount = collectDescendantIds(optimistic, id).length - 1;
+    if (childCount === 0) {
+      performDelete(id);
+    } else {
+      setDeletingId(id);
+    }
+  };
 
   /** 자식 페이지 생성 후 부모를 자동 펼침하고 새 페이지로 이동 */
   const onAddChild = (parentId: string | null) => {
@@ -152,6 +202,16 @@ export function PageTree({ pages }: Props) {
           onSubmit={handleMoveSubmit}
         />
       )}
+      <DeleteConfirmModal
+        open={deletingId !== null}
+        childCount={deletingChildren}
+        onCancel={() => setDeletingId(null)}
+        onConfirm={() => {
+          const id = deletingId!;
+          setDeletingId(null);
+          performDelete(id);
+        }}
+      />
     </>
   );
 }
