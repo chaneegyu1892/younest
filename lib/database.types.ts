@@ -383,6 +383,7 @@ export type Database = {
     }
     Functions: {
       extract_blocknote_text: { Args: { doc: Json }; Returns: string }
+      hard_delete_pages: { Args: { p_ids: string[] }; Returns: number }
       search_pages: {
         Args: {
           q: string
