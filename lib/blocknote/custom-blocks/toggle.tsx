@@ -15,49 +15,42 @@ interface ToggleRenderProps {
 }
 
 function ToggleRender(props: ToggleRenderProps) {
-  // props.block.props.open은 영구 저장값 — 단순 표시용은 로컬 상태로 토글
+  // M2.2: 헤더 인라인 텍스트 + 펼침/접힘 시각 표시만. 진짜 nested children은 후속 phase.
   const [open, setOpen] = useState<boolean>(props.block.props.open);
 
   return (
-    <div style={{ width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <button
-          type="button"
-          onClick={() => {
-            const next = !open;
-            setOpen(next);
-            // editor.updateBlock 시그니처는 BlockNote 내부 타입에 의존 — props 통째로 캐스팅
-            (props.editor as unknown as {
-              updateBlock: (b: unknown, p: { props: { open: boolean } }) => void;
-            }).updateBlock(props.block, { props: { open: next } });
-          }}
-          aria-label={open ? "접기" : "펼치기"}
-          style={{
-            cursor: "pointer",
-            background: "transparent",
-            border: "none",
-            padding: 0,
-            width: "1rem",
-            height: "1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transform: open ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 120ms ease",
-          }}
-        >
-          ▶
-        </button>
-        <div ref={props.contentRef} style={{ flex: 1 }} />
-      </div>
-      {/* 자식 블록은 BlockNote가 자동 렌더 — open=false면 CSS로 숨김 */}
-      <div
-        style={{
-          marginLeft: "1.5rem",
-          display: open ? "block" : "none",
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", width: "100%" }}>
+      <button
+        type="button"
+        onClick={() => {
+          const next = !open;
+          setOpen(next);
+          (props.editor as unknown as {
+            updateBlock: (b: unknown, p: { props: { open: boolean } }) => void;
+          }).updateBlock(props.block, { props: { open: next } });
         }}
-        data-toggle-children={open ? "open" : "closed"}
-      />
+        aria-label={open ? "접기" : "펼치기"}
+        contentEditable={false}
+        style={{
+          cursor: "pointer",
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          width: "1rem",
+          height: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          transform: open ? "rotate(90deg)" : "rotate(0deg)",
+          transition: "transform 120ms ease",
+          color: "rgb(107 114 128)",
+          fontSize: "0.75rem",
+        }}
+      >
+        ▶
+      </button>
+      <div ref={props.contentRef} style={{ flex: 1, minWidth: 0 }} />
     </div>
   );
 }
