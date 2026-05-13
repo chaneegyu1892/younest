@@ -117,3 +117,12 @@ describe("M1.4 RLS — 어드민 UI는 콘텐츠 테이블 미접근 (PRD §8.5)
     });
   }
 });
+
+describe("M2.1 RLS — pages Server Action service-role 미사용", () => {
+  it("lib/actions/pages.ts가 createSupabaseAdminClient 호출 없음", () => {
+    const content = readFileSync(join(REPO_ROOT, "lib/actions/pages.ts"), "utf-8");
+    expect(content, "service-role client는 어드민 영역에서만 사용해야 합니다").not.toMatch(
+      /createSupabaseAdminClient/,
+    );
+  });
+});
