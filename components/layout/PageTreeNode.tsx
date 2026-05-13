@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import type { PageTreeNode as Node } from "@/lib/pages/types";
+import { PageContextMenu } from "./PageContextMenu";
 
 interface Props {
   node: Node;
@@ -10,6 +11,10 @@ interface Props {
   onToggleExpand: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onAddChild: (parentId: string) => void;
+  onToggleFavorite: (id: string) => void;
+  onMove: (id: string) => void;
+  onDelete: (id: string) => void;
+  onSetIcon: (id: string, icon: string | null) => void;
 }
 
 /**
@@ -26,6 +31,10 @@ export function PageTreeNode({
   onToggleExpand,
   onRename,
   onAddChild,
+  onToggleFavorite,
+  onMove,
+  onDelete,
+  onSetIcon,
 }: Props) {
   const isOpen = expanded.has(node.id);
   const hasChildren = node.children.length > 0;
@@ -33,6 +42,8 @@ export function PageTreeNode({
   const [draft, setDraft] = useState(node.title ?? "");
   // IME 변환 중 Enter 무시를 위한 ref
   const composingRef = useRef(false);
+  // 컨텍스트 메뉴 위치 상태 (null이면 닫힘)
+  const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   /** 편집 내용을 저장하고 편집 모드를 종료한다 */
   const commit = () => {
@@ -46,6 +57,10 @@ export function PageTreeNode({
       <div
         className="group flex items-center gap-1 rounded py-1 pr-2 hover:bg-background"
         style={{ paddingLeft: `${8 + node.depth * 12}px` }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setMenuPos({ x: e.clientX, y: e.clientY });
+        }}
       >
         <button
           type="button"
@@ -104,7 +119,33 @@ export function PageTreeNode({
         >
           +
         </button>
+        {/* hover 시 노출되는 컨텍스트 메뉴 버튼 */}
+        <button
+          type="button"
+          aria-label="메뉴"
+          onClick={(e) => {
+            e.preventDefault();
+            const r = e.currentTarget.getBoundingClientRect();
+            setMenuPos({ x: r.left, y: r.bottom });
+          }}
+          className="invisible h-5 w-5 rounded text-text-tertiary group-hover:visible hover:bg-surface"
+        >
+          ⋯
+        </button>
       </div>
+      {/* 컨텍스트 메뉴 */}
+      <PageContextMenu
+        open={menuPos !== null}
+        x={menuPos?.x ?? 0}
+        y={menuPos?.y ?? 0}
+        onClose={() => setMenuPos(null)}
+        onAddChild={() => onAddChild(node.id)}
+        onToggleFavorite={() => onToggleFavorite(node.id)}
+        onMove={() => onMove(node.id)}
+        onDelete={() => onDelete(node.id)}
+        onSetIcon={(icon) => onSetIcon(node.id, icon)}
+        isFavorite={node.is_favorite}
+      />
       {isOpen &&
         node.children.map((child) => (
           <PageTreeNode
@@ -114,6 +155,10 @@ export function PageTreeNode({
             onToggleExpand={onToggleExpand}
             onRename={onRename}
             onAddChild={onAddChild}
+            onToggleFavorite={onToggleFavorite}
+            onMove={onMove}
+            onDelete={onDelete}
+            onSetIcon={onSetIcon}
           />
         ))}
     </div>

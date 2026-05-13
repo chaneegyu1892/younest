@@ -10,7 +10,7 @@ import {
   saveExpandedIds,
   toggleExpanded,
 } from "@/lib/pages/expanded-state";
-import { createPage, renamePage } from "@/lib/actions/pages";
+import { createPage, renamePage, toggleFavorite, setPageIcon } from "@/lib/actions/pages";
 import type { PageNode, OptimisticMutation } from "@/lib/pages/types";
 import { PageTreeNode } from "./PageTreeNode";
 
@@ -55,6 +55,30 @@ export function PageTree({ pages }: Props) {
     });
   };
 
+  /** 즐겨찾기 상태를 토글한다 (낙관적 업데이트) */
+  const onToggleFav = (id: string) => {
+    const current = optimistic.find((n) => n.id === id);
+    if (!current) return;
+    startTransition(async () => {
+      applyOptimistic({ kind: "toggleFavorite", id, is_favorite: !current.is_favorite });
+      const res = await toggleFavorite(id);
+      if (!res.ok) toast.error(res.error);
+    });
+  };
+
+  /** 페이지 아이콘을 변경한다 (낙관적 업데이트) */
+  const onSetIcon = (id: string, icon: string | null) => {
+    startTransition(async () => {
+      applyOptimistic({ kind: "setIcon", id, icon });
+      const res = await setPageIcon(id, icon);
+      if (!res.ok) toast.error(res.error);
+    });
+  };
+
+  // Move/Delete는 T18-T19에서 모달 추가하면서 와이어링 예정. 우선 빈 함수.
+  const onMove = (_id: string) => { /* T18 */ };
+  const onDelete = (_id: string) => { /* T19 */ };
+
   /** 자식 페이지 생성 후 부모를 자동 펼침하고 새 페이지로 이동 */
   const onAddChild = (parentId: string | null) => {
     startTransition(async () => {
@@ -94,6 +118,10 @@ export function PageTree({ pages }: Props) {
           onToggleExpand={onToggle}
           onRename={onRename}
           onAddChild={onAddChild}
+          onToggleFavorite={onToggleFav}
+          onSetIcon={onSetIcon}
+          onMove={onMove}
+          onDelete={onDelete}
         />
       ))}
     </div>

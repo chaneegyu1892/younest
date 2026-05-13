@@ -22,6 +22,10 @@ describe("PageTreeNode", () => {
         onToggleExpand={vi.fn()}
         onRename={vi.fn()}
         onAddChild={vi.fn()}
+        onToggleFavorite={vi.fn()}
+        onMove={vi.fn()}
+        onDelete={vi.fn()}
+        onSetIcon={vi.fn()}
       />,
     );
     fireEvent.doubleClick(screen.getByText("Hello"));
@@ -37,6 +41,10 @@ describe("PageTreeNode", () => {
         onToggleExpand={vi.fn()}
         onRename={onRename}
         onAddChild={vi.fn()}
+        onToggleFavorite={vi.fn()}
+        onMove={vi.fn()}
+        onDelete={vi.fn()}
+        onSetIcon={vi.fn()}
       />,
     );
     fireEvent.doubleClick(screen.getByText("Hello"));
@@ -55,6 +63,10 @@ describe("PageTreeNode", () => {
         onToggleExpand={vi.fn()}
         onRename={onRename}
         onAddChild={vi.fn()}
+        onToggleFavorite={vi.fn()}
+        onMove={vi.fn()}
+        onDelete={vi.fn()}
+        onSetIcon={vi.fn()}
       />,
     );
     fireEvent.doubleClick(screen.getByText("Hello"));
@@ -73,6 +85,10 @@ describe("PageTreeNode", () => {
         onToggleExpand={vi.fn()}
         onRename={onRename}
         onAddChild={vi.fn()}
+        onToggleFavorite={vi.fn()}
+        onMove={vi.fn()}
+        onDelete={vi.fn()}
+        onSetIcon={vi.fn()}
       />,
     );
     fireEvent.doubleClick(screen.getByText("Hello"));
