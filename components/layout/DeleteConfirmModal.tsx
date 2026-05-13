@@ -40,7 +40,7 @@ export function DeleteConfirmModal({ open, childCount, onCancel, onConfirm }: Pr
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded bg-status-error px-3 py-1 text-body text-white"
+            className="rounded bg-error px-3 py-1 text-body text-white"
           >
             삭제
           </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useOptimistic, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   renamePage,
@@ -16,23 +16,49 @@ interface Props {
   initialFavorite: boolean;
 }
 
-export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: Props) {
-  const [title, setTitle] = useState(initialTitle ?? "");
-  const [icon, setIcon] = useState(initialIcon);
-  const [fav, setFav] = useState(initialFavorite);
+/**
+ * 페이지 본문 헤더 — 아이콘 / 인라인 제목 편집 / 즐겨찾기 별.
+ *
+ * 표시 상태는 useOptimistic으로 관리하여,
+ * - 본인이 액션 호출 시 즉시 낙관적 반영
+ * - 다른 곳(사이드바)에서 mutation → revalidate로 props 갱신되면 자동 수렴
+ *
+ * 편집 입력(draft)만 별도 useState로 관리한다.
+ */
+export function PageHeader({
+  id,
+  initialTitle,
+  initialIcon,
+  initialFavorite,
+}: Props) {
+  const [optimisticTitle, applyOptimisticTitle] = useOptimistic(
+    initialTitle ?? "",
+    (_curr: string, next: string) => next,
+  );
+  const [optimisticIcon, applyOptimisticIcon] = useOptimistic(
+    initialIcon,
+    (_curr: string | null, next: string | null) => next,
+  );
+  const [optimisticFav, applyOptimisticFav] = useOptimistic(
+    initialFavorite,
+    (_curr: boolean, next: boolean) => next,
+  );
+
   const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [, start] = useTransition();
+  const [, startTransition] = useTransition();
   // IME 조합 중에는 Enter 키로 제목을 확정하지 않도록 방지
   const composingRef = useRef(false);
 
   /** 제목 입력 완료 — blur 또는 Enter 키에서 호출 */
   const commitTitle = () => {
     setEditing(false);
-    const next = title.trim();
+    const next = draft.trim();
     // 변경 없으면 서버 호출 생략
-    if (next === (initialTitle ?? "")) return;
-    start(async () => {
+    if (next === optimisticTitle) return;
+    startTransition(async () => {
+      applyOptimisticTitle(next);
       const res = await renamePage(id, next);
       if (!res.ok) toast.error(res.error);
     });
@@ -40,8 +66,8 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
 
   /** 이모지 픽커에서 아이콘 선택 */
   const onIconSelect = (next: string | null) => {
-    setIcon(next);
-    start(async () => {
+    startTransition(async () => {
+      applyOptimisticIcon(next);
       const res = await setPageIcon(id, next);
       if (!res.ok) toast.error(res.error);
     });
@@ -49,9 +75,8 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
 
   /** 즐겨찾기 토글 */
   const onToggleFav = () => {
-    // 낙관적 UI 업데이트
-    setFav((v) => !v);
-    start(async () => {
+    startTransition(async () => {
+      applyOptimisticFav(!optimisticFav);
       const res = await toggleFavorite(id);
       if (!res.ok) toast.error(res.error);
     });
@@ -66,7 +91,7 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
         onClick={() => setEmojiOpen(true)}
         className="text-h1"
       >
-        {icon ?? "📄"}
+        {optimisticIcon ?? "📄"}
       </button>
 
       {/* 인라인 제목 편집 영역 */}
@@ -74,8 +99,8 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
         {editing ? (
           <input
             autoFocus
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
             onCompositionStart={() => (composingRef.current = true)}
             onCompositionEnd={() => (composingRef.current = false)}
             onKeyDown={(e) => {
@@ -83,7 +108,6 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
               if (e.key === "Enter" && !composingRef.current) commitTitle();
               else if (e.key === "Escape") {
                 setEditing(false);
-                setTitle(initialTitle ?? "");
               }
             }}
             onBlur={commitTitle}
@@ -92,9 +116,12 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
         ) : (
           <h1
             className="cursor-text text-h1 font-semibold"
-            onDoubleClick={() => setEditing(true)}
+            onDoubleClick={() => {
+              setDraft(optimisticTitle);
+              setEditing(true);
+            }}
           >
-            {title || "제목 없음"}
+            {optimisticTitle || "제목 없음"}
           </h1>
         )}
       </div>
@@ -102,11 +129,11 @@ export function PageHeader({ id, initialTitle, initialIcon, initialFavorite }: P
       {/* 즐겨찾기 별 버튼 */}
       <button
         type="button"
-        aria-label={fav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+        aria-label={optimisticFav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
         onClick={onToggleFav}
         className="text-h1"
       >
-        {fav ? "⭐" : "☆"}
+        {optimisticFav ? "⭐" : "☆"}
       </button>
 
       {/* 이모지 픽커 팝오버 */}

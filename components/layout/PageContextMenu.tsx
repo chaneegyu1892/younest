@@ -91,7 +91,7 @@ function Item({
       type="button"
       onClick={onClick}
       className={`w-full px-3 py-2 text-left text-body hover:bg-background ${
-        danger ? "text-status-error" : "text-text-primary"
+        danger ? "text-error" : "text-text-primary"
       }`}
     >
       {children}

@@ -31,6 +31,8 @@ export function PageTree({ pages }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // hydration 완료 전엔 트리를 숨겨 잘못된 접힘 상태가 깜빡이는 현상을 방지
+  const [hydrated, setHydrated] = useState(false);
   const [optimistic, applyOptimistic] = useOptimistic(
     pages,
     (state: PageNode[], mutation: OptimisticMutation) =>
@@ -45,9 +47,10 @@ export function PageTree({ pages }: Props) {
     ? collectDescendantIds(optimistic, deletingId).length - 1
     : 0;
 
-  // SSR 안전: 마운트 후에만 localStorage 읽기
+  // SSR 안전: 마운트 후에만 localStorage 읽기 + hydration 완료 표시
   useEffect(() => {
     setExpanded(loadExpandedIds());
+    setHydrated(true);
   }, []);
 
   const tree = useMemo(() => buildTree(optimistic), [optimistic]);
@@ -169,7 +172,7 @@ export function PageTree({ pages }: Props) {
 
   return (
     <>
-      <div className="space-y-px">
+      <div className={hydrated ? "space-y-px" : "invisible space-y-px"}>
         {/* 루트 페이지 추가 버튼 */}
         <div className="mb-1 flex justify-end px-2">
           <button
