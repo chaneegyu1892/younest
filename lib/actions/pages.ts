@@ -20,6 +20,14 @@ const renameSchema = z.object({
   title: z.string().max(200),
 });
 
+const setIconSchema = z.object({
+  id: z.string().uuid(),
+  // 이모지 한 글자는 보통 ≤ 16 UTF-16 code units. 충분한 상한.
+  icon: z.string().max(16).nullable(),
+});
+
+const idSchema = z.string().uuid();
+
 // ─── 헬퍼 ────────────────────────────────────────────────────────────────────
 
 /** select 컬럼 목록 — PageNode와 1:1 대응 */
@@ -114,4 +122,62 @@ export async function renamePage(
   revalidatePath(`/p/${parsed.data.id}`, "page");
 
   return { ok: true, data: { id: parsed.data.id, title: parsed.data.title } };
+}
+
+/**
+ * 페이지 아이콘을 설정한다.
+ * - null 전달 시 아이콘 제거
+ * - emoji 16자 초과는 Zod에서 차단
+ */
+export async function setPageIcon(
+  id: string,
+  icon: string | null,
+): Promise<ActionResult<{ id: string; icon: string | null }>> {
+  const parsed = setIconSchema.safeParse({ id, icon });
+  if (!parsed.success) return { ok: false, error: "잘못된 아이콘입니다." };
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("pages")
+    .update({ icon: parsed.data.icon })
+    .eq("id", parsed.data.id);
+
+  if (error) return { ok: false, error: error.message };
+  revalidateAppLayout();
+  revalidatePath(`/p/${parsed.data.id}`, "page");
+  return { ok: true, data: { id: parsed.data.id, icon: parsed.data.icon } };
+}
+
+/**
+ * 즐겨찾기 상태를 토글한다.
+ * - 현재 is_favorite 값을 읽어 반전 후 저장
+ */
+export async function toggleFavorite(
+  id: string,
+): Promise<ActionResult<{ id: string; is_favorite: boolean }>> {
+  const parsed = idSchema.safeParse(id);
+  if (!parsed.success) return { ok: false, error: "잘못된 페이지 ID입니다." };
+
+  const supabase = await createSupabaseServerClient();
+
+  // 현재 상태 읽어서 토글
+  const { data: row, error: readErr } = await supabase
+    .from("pages")
+    .select("is_favorite")
+    .eq("id", parsed.data)
+    .maybeSingle();
+  if (readErr || !row) {
+    return { ok: false, error: "페이지를 찾을 수 없습니다." };
+  }
+
+  const next = !row.is_favorite;
+  const { error } = await supabase
+    .from("pages")
+    .update({ is_favorite: next })
+    .eq("id", parsed.data);
+
+  if (error) return { ok: false, error: error.message };
+  revalidateAppLayout();
+  revalidatePath(`/p/${parsed.data}`, "page");
+  return { ok: true, data: { id: parsed.data, is_favorite: next } };
 }
