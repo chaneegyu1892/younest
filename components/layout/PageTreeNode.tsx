@@ -2,8 +2,11 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { PageTreeNode as Node } from "@/lib/pages/types";
 import { PageContextMenu } from "./PageContextMenu";
+import { PageDropZone } from "./PageDropZone";
 
 /** 더블클릭 감지 윈도우 (ms) — 이 시간 안에 두 번째 클릭이 들어오면 편집 진입 */
 const DOUBLE_CLICK_WINDOW = 250;
@@ -77,8 +80,25 @@ export function PageTreeNode({
     if (next !== (node.title ?? "")) onRename(node.id, next);
   };
 
+  // dnd-kit sortable — 노드 자체가 draggable이 되며, transform/transition은 dragging 중 비주얼 처리
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: node.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
   return (
-    <div>
+    <div ref={setNodeRef} style={style}>
+      <PageDropZone id={`${node.id}-above`} />
       <div
         className="group flex items-center gap-1 rounded py-1 pr-2 hover:bg-background"
         style={{ paddingLeft: `${8 + node.depth * 12}px` }}
@@ -103,6 +123,15 @@ export function PageTreeNode({
           if (longPressTimer.current) clearTimeout(longPressTimer.current);
         }}
       >
+        <button
+          type="button"
+          aria-label="드래그 핸들"
+          {...attributes}
+          {...listeners}
+          className="invisible h-4 w-3 cursor-grab text-text-tertiary group-hover:visible"
+        >
+          ⋮⋮
+        </button>
         <button
           type="button"
           aria-label={isOpen ? "접기" : "펼치기"}
@@ -174,6 +203,7 @@ export function PageTreeNode({
           ⋯
         </button>
       </div>
+      <PageDropZone id={`${node.id}-below`} />
       {/* 컨텍스트 메뉴 */}
       <PageContextMenu
         open={menuPos !== null}
