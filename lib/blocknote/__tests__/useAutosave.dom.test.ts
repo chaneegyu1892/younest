@@ -48,7 +48,7 @@ describe("useAutosave", () => {
 
   it("실패 시 1s/2s/4s 백오프로 3회 재시도 후 error", async () => {
     const save = vi.fn().mockResolvedValue({ ok: false, error: "save_failed" });
-    const { result } = renderHook(() => useAutosave("p1", save));
+    const { result, unmount } = renderHook(() => useAutosave("p1", save));
 
     act(() => result.current.schedule([{ v: 1 }]));
     await act(async () => { vi.advanceTimersByTime(500); await Promise.resolve(); });
@@ -64,16 +64,19 @@ describe("useAutosave", () => {
     expect(save).toHaveBeenCalledTimes(4); // 1차 + 재시도 3회
 
     expect(result.current.status).toBe("error");
+
+    unmount();
+    await Promise.resolve();
   });
 
   it("error 상태에서 retry() 호출 시 즉시 재시도", async () => {
-    const save = vi
-      .fn()
+    const save = vi.fn();
+    save
       .mockResolvedValueOnce({ ok: false, error: "save_failed" })
       .mockResolvedValueOnce({ ok: false, error: "save_failed" })
       .mockResolvedValueOnce({ ok: false, error: "save_failed" })
       .mockResolvedValueOnce({ ok: false, error: "save_failed" })
-      .mockResolvedValueOnce({ ok: true, updatedAt: "t1" });
+      .mockResolvedValue({ ok: true, updatedAt: "t1" });
 
     const { result } = renderHook(() => useAutosave("p1", save));
     act(() => result.current.schedule([{ v: 1 }]));

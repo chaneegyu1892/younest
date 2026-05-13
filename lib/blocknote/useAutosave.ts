@@ -59,9 +59,6 @@ export function useAutosave(
     setStatus("saving");
     const result = await save(payload);
 
-    // save()가 undefined를 반환하는 경우(테스트 mock 소진 등) 조용히 무시
-    if (result === undefined) return;
-
     if (result.ok) {
       // pending이 같은 값일 때만 confirm — 그 사이 새 입력이 들어왔다면 다음 사이클에 처리
       if (ref.current.pending === payload) {
