@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { PageTreeNode as Node } from "@/lib/pages/types";
 import { PageContextMenu } from "./PageContextMenu";
+
+/** 더블클릭 감지 윈도우 (ms) — 이 시간 안에 두 번째 클릭이 들어오면 편집 진입 */
+const DOUBLE_CLICK_WINDOW = 250;
 
 interface Props {
   node: Node;
@@ -46,6 +49,26 @@ export function PageTreeNode({
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   // 모바일 롱프레스 타이머 ref — 500ms 유지 시 컨텍스트 메뉴 오픈
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // single-click → navigate 지연 타이머 (더블클릭 감지를 위해 250ms 대기)
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
+
+  /** 제목 영역 클릭 — 1회는 지연 후 이동, 2회 안에 들어오면 편집 진입 */
+  const handleTitleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (clickTimer.current) {
+      // 더블클릭 — 예약된 이동 취소 + 편집 모드 진입
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+      setDraft(node.title ?? "");
+      setEditing(true);
+      return;
+    }
+    clickTimer.current = setTimeout(() => {
+      clickTimer.current = null;
+      router.push(`/p/${node.id}`);
+    }, DOUBLE_CLICK_WINDOW);
+  };
 
   /** 편집 내용을 저장하고 편집 모드를 종료한다 */
   const commit = () => {
@@ -113,17 +136,17 @@ export function PageTreeNode({
             className="flex-1 rounded border border-border bg-surface px-1 py-0 text-body"
           />
         ) : (
-          <Link
-            href={`/p/${node.id}`}
-            onDoubleClick={(e) => {
-              e.preventDefault();
-              setDraft(node.title ?? "");
-              setEditing(true);
-            }}
-            className="flex-1 truncate text-body text-text-primary"
+          // Link 대신 span — Link는 single-click이 즉시 navigate되어
+          // 두 번째 클릭 전에 unmount되므로 onDoubleClick이 동작하지 않음.
+          // 250ms 윈도우로 single/double을 구분.
+          <span
+            role="link"
+            tabIndex={0}
+            onClick={handleTitleClick}
+            className="flex-1 cursor-pointer truncate text-body text-text-primary"
           >
             {node.title || "제목 없음"}
-          </Link>
+          </span>
         )}
         {/* hover 시 노출되는 하위 페이지 추가 버튼 */}
         <button
