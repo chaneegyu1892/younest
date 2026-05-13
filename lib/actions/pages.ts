@@ -5,9 +5,16 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { nextPosition } from "@/lib/pages/position";
+import { isDescendant } from "@/lib/pages/tree";
 import type { ActionResult, PageNode } from "@/lib/pages/types";
 
 // ─── 스키마 ───────────────────────────────────────────────────────────────────
+
+const moveSchema = z.object({
+  id: z.string().uuid(),
+  newParentId: z.string().uuid().nullable(),
+  newPosition: z.number().int().nonnegative().optional(),
+});
 
 const createSchema = z.object({
   parentPageId: z.string().uuid().nullable(),
@@ -180,4 +187,72 @@ export async function toggleFavorite(
   revalidateAppLayout();
   revalidatePath(`/p/${parsed.data}`, "page");
   return { ok: true, data: { id: parsed.data, is_favorite: next } };
+}
+
+/**
+ * 페이지를 다른 위치로 이동한다.
+ * - newParentId: 루트로 이동 시 null, 자식으로 이동 시 부모 UUID
+ * - newPosition: 생략 시 대상 parent의 마지막 위치로 자동 계산
+ * - 자기 자신이나 후손으로 이동하는 경우 사이클 방지로 차단
+ */
+export async function movePage(
+  id: string,
+  newParentId: string | null,
+  newPosition?: number,
+): Promise<
+  ActionResult<{
+    id: string;
+    parent_page_id: string | null;
+    position: number;
+  }>
+> {
+  // Zod 검증
+  const parsed = moveSchema.safeParse({ id, newParentId, newPosition });
+  if (!parsed.success) return { ok: false, error: "잘못된 이동 요청입니다." };
+
+  const supabase = await createSupabaseServerClient();
+
+  // 사이클 검증을 위해 모든 페이지 읽기 (RLS로 본인 페이지만 반환)
+  const { data: all, error: readErr } = await supabase
+    .from("pages")
+    .select(
+      "id, user_id, parent_page_id, type, title, icon, is_favorite, position, created_at, updated_at",
+    )
+    .is("deleted_at", null);
+  if (readErr) return { ok: false, error: readErr.message };
+
+  const allNodes = (all ?? []) as PageNode[];
+
+  // 이동 대상이 자기 자신이나 후손이면 사이클 발생 — 차단
+  if (
+    parsed.data.newParentId !== null &&
+    isDescendant(allNodes, parsed.data.id, parsed.data.newParentId)
+  ) {
+    return { ok: false, error: "자기 자신이나 후손으로는 이동할 수 없어요." };
+  }
+
+  // newPosition 미지정 시 대상 parent의 마지막 위치 + 1 자동 계산
+  const position =
+    parsed.data.newPosition ?? nextPosition(allNodes, parsed.data.newParentId);
+
+  const { error } = await supabase
+    .from("pages")
+    .update({
+      parent_page_id: parsed.data.newParentId,
+      position,
+    })
+    .eq("id", parsed.data.id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateAppLayout();
+  revalidatePath(`/p/${parsed.data.id}`, "page");
+  return {
+    ok: true,
+    data: {
+      id: parsed.data.id,
+      parent_page_id: parsed.data.newParentId,
+      position,
+    },
+  };
 }

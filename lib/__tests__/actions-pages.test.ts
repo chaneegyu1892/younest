@@ -11,7 +11,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { createPage, renamePage, setPageIcon, toggleFavorite } from "@/lib/actions/pages";
+import { createPage, renamePage, setPageIcon, toggleFavorite, movePage } from "@/lib/actions/pages";
 import { getSessionUser } from "@/lib/auth/session";
 
 beforeEach(() => {
@@ -66,6 +66,20 @@ describe("setPageIcon Zod", () => {
 describe("toggleFavorite Zod", () => {
   it("uuid 아니면 reject", async () => {
     const res = await toggleFavorite("not-uuid");
+    expect(res.ok).toBe(false);
+  });
+});
+
+describe("movePage Zod", () => {
+  it("id가 uuid 아니면 reject", async () => {
+    const res = await movePage("not-uuid", null);
+    expect(res.ok).toBe(false);
+  });
+  it("newParentId가 잘못된 uuid면 reject", async () => {
+    const res = await movePage(
+      "00000000-0000-0000-0000-000000000000",
+      "not-uuid",
+    );
     expect(res.ok).toBe(false);
   });
 });
