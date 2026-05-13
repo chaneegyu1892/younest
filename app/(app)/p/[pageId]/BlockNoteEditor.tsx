@@ -55,7 +55,7 @@ export function BlockNoteEditor({ pageId, initialContent, availablePages }: Prop
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-10 mb-2 flex justify-end bg-white/80 py-1 backdrop-blur">
+      <div className="mb-2 flex h-5 justify-end">
         <SaveStatusBadge status={status} lastSavedAt={lastSavedAt} onRetry={retry} />
       </div>
 
