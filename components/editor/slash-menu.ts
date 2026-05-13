@@ -14,12 +14,22 @@ import type { YounestEditor } from "@/lib/blocknote/schema";
 /**
  * 슬래시 명령으로 커스텀 블록 삽입 시 현재 라인을 새 블록으로 교체.
  * insertBlocks(..., "after")를 쓰면 빈 paragraph가 위에 남아 다음 줄에 생기는 것처럼 보임.
+ * 교체 후 새 블록의 시작 위치로 커서를 명시적으로 이동 (기본 동작이 다음 라인으로 빠지는 케이스 방지).
  */
 function replaceCurrentBlock(editor: YounestEditor, block: unknown) {
   const current = editor.getTextCursorPosition().block;
-  (editor as unknown as {
-    replaceBlocks: (refs: unknown[], blocks: unknown[]) => void;
+  const { insertedBlocks } = (editor as unknown as {
+    replaceBlocks: (
+      refs: unknown[],
+      blocks: unknown[],
+    ) => { insertedBlocks: { id: string }[] };
   }).replaceBlocks([current], [block]);
+  const newBlock = insertedBlocks[0];
+  if (newBlock) {
+    (editor as unknown as {
+      setTextCursorPosition: (id: string, placement?: "start" | "end") => void;
+    }).setTextCursorPosition(newBlock.id, "end");
+  }
 }
 
 export function getSlashMenuItems(
