@@ -44,6 +44,8 @@ export function PageTreeNode({
   const composingRef = useRef(false);
   // 컨텍스트 메뉴 위치 상태 (null이면 닫힘)
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
+  // 모바일 롱프레스 타이머 ref — 500ms 유지 시 컨텍스트 메뉴 오픈
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** 편집 내용을 저장하고 편집 모드를 종료한다 */
   const commit = () => {
@@ -60,6 +62,22 @@ export function PageTreeNode({
         onContextMenu={(e) => {
           e.preventDefault();
           setMenuPos({ x: e.clientX, y: e.clientY });
+        }}
+        onTouchStart={(e) => {
+          // noUncheckedIndexedAccess 때문에 Touch | undefined — 가드 필수
+          const t = e.touches[0];
+          if (!t) return;
+          const x = t.clientX;
+          const y = t.clientY;
+          longPressTimer.current = setTimeout(() => {
+            setMenuPos({ x, y });
+          }, 500);
+        }}
+        onTouchEnd={() => {
+          if (longPressTimer.current) clearTimeout(longPressTimer.current);
+        }}
+        onTouchMove={() => {
+          if (longPressTimer.current) clearTimeout(longPressTimer.current);
         }}
       >
         <button

@@ -21,10 +21,12 @@ interface SidebarMobileProps {
 /**
  * 모바일 사이드바 (md 미만에서만 표시).
  * 햄버거 버튼 클릭 → 좌측 Sheet로 사이드바 내용 표시.
- * 풀 모바일 UX(즐겨찾기, 검색 등)는 T21에서 완성 예정.
+ * T21에서 즐겨찾기 섹션 추가 완성.
  */
 export function SidebarMobile({ userName, pages }: SidebarMobileProps) {
   const hasPages = pages.length > 0;
+  // 즐겨찾기 페이지 최대 8개 (is_favorite === true)
+  const favorites = pages.filter((p) => p.is_favorite).slice(0, 8);
 
   return (
     <div className="flex items-center justify-between">
@@ -54,6 +56,24 @@ export function SidebarMobile({ userName, pages }: SidebarMobileProps) {
           </SheetHeader>
 
           <nav className="flex-1 overflow-y-auto px-2 py-4">
+            {/* 즐겨찾기 섹션: is_favorite인 페이지 최대 8개 표시 */}
+            {favorites.length > 0 && (
+              <div className="px-2 py-3">
+                <h3 className="px-2 text-caption uppercase tracking-wider text-text-tertiary">
+                  즐겨찾기
+                </h3>
+                {favorites.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/p/${p.id}`}
+                    className="block truncate rounded py-1 px-2 text-body text-text-primary hover:bg-background"
+                  >
+                    {p.icon ?? "⭐"} {p.title || "제목 없음"}
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <div className="px-2 py-3">
               <h3 className="px-2 text-caption uppercase tracking-wider text-text-tertiary">
                 내 페이지
