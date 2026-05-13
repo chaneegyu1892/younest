@@ -16,6 +16,7 @@ export interface PageNode {
   is_favorite: boolean;
   position: number;
   content: unknown[] | null;
+  content_text: string | null;
   created_at: string;
   updated_at: string;
 }

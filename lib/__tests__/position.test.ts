@@ -13,6 +13,7 @@ function n(id: string, parent: string | null, pos: number): PageNode {
     is_favorite: false,
     position: pos,
     content: null,
+    content_text: null,
     created_at: "",
     updated_at: "",
   };

@@ -24,6 +24,7 @@ function makeNode(over: Partial<Node> = {}): Node {
     is_favorite: false,
     position: 0,
     content: null,
+    content_text: null,
     created_at: "",
     updated_at: "",
     children: [],

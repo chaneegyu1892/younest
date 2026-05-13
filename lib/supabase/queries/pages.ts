@@ -6,7 +6,7 @@ import type { PageNode } from "@/lib/pages/types";
  * title_encrypted, cover_url, is_private는 M2.1 범위 밖이라 제외.
  */
 const PAGE_SELECT =
-  "id, user_id, parent_page_id, type, title, icon, is_favorite, position, content, created_at, updated_at";
+  "id, user_id, parent_page_id, type, title, icon, is_favorite, position, content, content_text, created_at, updated_at";
 
 /**
  * 현재 사용자의 모든 살아있는(deleted_at IS NULL) 페이지를 flat 배열로 반환.
