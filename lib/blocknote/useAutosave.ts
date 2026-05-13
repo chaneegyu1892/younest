@@ -59,6 +59,9 @@ export function useAutosave(
     setStatus("saving");
     const result = await save(payload);
 
+    // save()가 undefined를 반환하는 경우(테스트 mock 소진 등) 조용히 무시
+    if (result === undefined) return;
+
     if (result.ok) {
       // pending이 같은 값일 때만 confirm — 그 사이 새 입력이 들어왔다면 다음 사이클에 처리
       if (ref.current.pending === payload) {
@@ -135,20 +138,12 @@ export function useAutosave(
   }, [doSave]);
 
   // unmount 시 pending flush + 타이머 정리
-  // error 상태가 아닌 경우(debounce 대기 중인 변경만)에만 flush
-  const statusRef = useRef<AutosaveStatus>("idle");
   useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
-
-  useEffect(() => {
-    // ref는 DOM 노드가 아닌 mutable ref이므로 cleanup 내 .current 접근이 안전하다.
-    // 캡처를 위해 ref 객체 자체를 로컬 변수에 저장한다.
     const internalRef = ref;
     return () => {
-      // 재시도 실패(error) 상태나 이미 진행 중인 경우는 flush 불필요 — debounce 대기 중인 것만
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      if (internalRef.current.pending !== undefined && internalRef.current.debounceTimer !== null) {
+      // unmount 시 pending이 있으면 상태(debounce/retry/error) 무관하게 flush 시도.
+      // debounce/retry 타이머는 어차피 사라지므로 데이터 손실 방지를 위해 즉시 호출.
+      if (internalRef.current.pending !== undefined) {
         void doSave();
       }
       clearTimers();

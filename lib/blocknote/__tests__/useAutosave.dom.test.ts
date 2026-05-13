@@ -132,4 +132,28 @@ describe("useAutosave", () => {
 
     expect(save).toHaveBeenCalledTimes(1);
   });
+
+  it("재시도 대기 중 unmount 시에도 pending 변경을 flush", async () => {
+    const save = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, error: "save_failed" })
+      .mockResolvedValueOnce({ ok: true, updatedAt: "t1" });
+
+    const { result, unmount } = renderHook(() => useAutosave("p1", save));
+
+    act(() => result.current.schedule([{ v: 1 }]));
+    // 디바운스 만료 → 첫 저장 시도 → 실패 → retry 대기 상태
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+    expect(save).toHaveBeenCalledTimes(1);
+    // 재시도 대기 중 unmount
+    unmount();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // unmount cleanup이 pending을 flush → 추가 1회 save 호출
+    expect(save).toHaveBeenCalledTimes(2);
+  });
 });
