@@ -13,9 +13,24 @@ import {
 import { createPage, renamePage, toggleFavorite, setPageIcon, movePage, softDeletePage, restorePage } from "@/lib/actions/pages";
 import { collectDescendantIds } from "@/lib/pages/tree";
 import type { PageNode, OptimisticMutation } from "@/lib/pages/types";
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { calculateDrop, type DropZone } from "@/lib/pages/dnd-calculate";
 import { PageTreeNode } from "./PageTreeNode";
 import { MovePageModal } from "./MovePageModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { RootDropZone } from "./RootDropZone";
 
 interface Props {
   pages: PageNode[];
@@ -54,6 +69,56 @@ export function PageTree({ pages }: Props) {
   }, []);
 
   const tree = useMemo(() => buildTree(optimistic), [optimistic]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const allIds = useMemo(() => optimistic.map((p) => p.id), [optimistic]);
+
+  const onDragEnd = (e: DragEndEvent) => {
+    if (!e.over) return;
+    const draggedId = String(e.active.id);
+    const overId = String(e.over.id);
+
+    // overId 형식 파싱:
+    //   "${pageId}-above" / "${pageId}-below" / "__root__" / 페이지 id
+    let targetId: string | null;
+    let zone: DropZone;
+    if (overId === "__root__") {
+      targetId = null;
+      zone = "body";
+    } else if (overId.endsWith("-above")) {
+      targetId = overId.slice(0, -"-above".length);
+      zone = "above";
+    } else if (overId.endsWith("-below")) {
+      targetId = overId.slice(0, -"-below".length);
+      zone = "below";
+    } else {
+      targetId = overId;
+      zone = "body";
+    }
+
+    const result = calculateDrop({ draggedId, targetId, zone, pages: optimistic });
+    if ("error" in result) {
+      if (result.error === "cycle") {
+        toast.error("자기 자신이나 후손으로는 이동할 수 없어요.");
+      }
+      return;
+    }
+
+    startTransition(async () => {
+      applyOptimistic({
+        kind: "move",
+        id: draggedId,
+        newParentId: result.newParentId,
+        newPosition: result.newPosition,
+      });
+      const res = await movePage(draggedId, result.newParentId, result.newPosition);
+      if (!res.ok) toast.error(res.error);
+    });
+  };
 
   const onToggle = (id: string) => {
     const next = toggleExpanded(expanded, id);
@@ -171,33 +236,36 @@ export function PageTree({ pages }: Props) {
   };
 
   return (
-    <>
-      <div className={hydrated ? "space-y-px" : "invisible space-y-px"}>
-        {/* 루트 페이지 추가 버튼 */}
-        <div className="mb-1 flex justify-end px-2">
-          <button
-            type="button"
-            onClick={() => onAddChild(null)}
-            className="rounded px-2 py-0.5 text-caption text-text-secondary hover:bg-background"
-          >
-            + 새 페이지
-          </button>
+    <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+      <SortableContext items={allIds} strategy={verticalListSortingStrategy}>
+        <div className={hydrated ? "space-y-px" : "invisible space-y-px"}>
+          {/* 루트 페이지 추가 버튼 */}
+          <div className="mb-1 flex justify-end px-2">
+            <button
+              type="button"
+              onClick={() => onAddChild(null)}
+              className="rounded px-2 py-0.5 text-caption text-text-secondary hover:bg-background"
+            >
+              + 새 페이지
+            </button>
+          </div>
+          {tree.map((node) => (
+            <PageTreeNode
+              key={node.id}
+              node={node}
+              expanded={expanded}
+              onToggleExpand={onToggle}
+              onRename={onRename}
+              onAddChild={onAddChild}
+              onToggleFavorite={onToggleFav}
+              onSetIcon={onSetIcon}
+              onMove={onMove}
+              onDelete={onDelete}
+            />
+          ))}
+          <RootDropZone />
         </div>
-        {tree.map((node) => (
-          <PageTreeNode
-            key={node.id}
-            node={node}
-            expanded={expanded}
-            onToggleExpand={onToggle}
-            onRename={onRename}
-            onAddChild={onAddChild}
-            onToggleFavorite={onToggleFav}
-            onSetIcon={onSetIcon}
-            onMove={onMove}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
+      </SortableContext>
       {movingId && (
         <MovePageModal
           open
@@ -217,6 +285,6 @@ export function PageTree({ pages }: Props) {
           performDelete(id);
         }}
       />
-    </>
+    </DndContext>
   );
 }
