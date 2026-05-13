@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       audit_logs: {
@@ -295,6 +270,7 @@ export type Database = {
         Row: {
           content: Json | null
           content_encrypted: string | null
+          content_text: string | null
           cover_url: string | null
           created_at: string
           deleted_at: string | null
@@ -313,6 +289,7 @@ export type Database = {
         Insert: {
           content?: Json | null
           content_encrypted?: string | null
+          content_text?: string | null
           cover_url?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -331,6 +308,7 @@ export type Database = {
         Update: {
           content?: Json | null
           content_encrypted?: string | null
+          content_text?: string | null
           cover_url?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -404,6 +382,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      extract_blocknote_text: { Args: { doc: Json }; Returns: string }
+      search_pages: {
+        Args: {
+          q: string
+          result_limit?: number
+          result_offset?: number
+          sort_mode?: string
+        }
+        Returns: {
+          content: Json | null
+          content_encrypted: string | null
+          content_text: string | null
+          cover_url: string | null
+          created_at: string
+          deleted_at: string | null
+          icon: string | null
+          id: string
+          is_favorite: boolean
+          is_private: boolean
+          parent_page_id: string | null
+          position: number
+          title: string | null
+          title_encrypted: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       soft_delete_page_cascade: {
         Args: { p_page_id: string }
         Returns: {
@@ -538,9 +552,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
