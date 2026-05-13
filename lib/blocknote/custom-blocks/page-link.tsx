@@ -44,24 +44,18 @@ export const PageLinkBlock = createReactBlockSpec(
         <Link
           href={`/p/${pageId}`}
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.5rem 0.75rem",
-            borderRadius: "0.375rem",
-            background: "rgb(243 244 246)",
+            display: "inline",
             color: "rgb(31 41 55)",
-            textDecoration: "none",
-            fontWeight: 500,
+            textDecoration: "underline",
+            textDecorationColor: "rgb(209 213 219)",
+            textDecorationThickness: "1px",
+            textUnderlineOffset: "2px",
             cursor: "pointer",
           }}
           contentEditable={false}
         >
-          <span aria-hidden>📄</span>
-          <span>{title}</span>
-          <span style={{ color: "rgb(156 163 175)", fontSize: "0.75rem" }}>
-            ({pageId.slice(0, 8)})
-          </span>
+          <span aria-hidden style={{ marginRight: "0.25rem" }}>📄</span>
+          {title}
         </Link>
       );
     },
