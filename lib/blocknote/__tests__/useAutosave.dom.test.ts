@@ -4,6 +4,7 @@ import { useAutosave } from "@/lib/blocknote/useAutosave";
 
 beforeEach(() => {
   vi.useFakeTimers();
+  if (typeof sessionStorage !== "undefined") sessionStorage.clear();
 });
 
 afterEach(() => {

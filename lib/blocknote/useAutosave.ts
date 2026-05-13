@@ -22,8 +22,7 @@ const DEBOUNCE_MS = 500;
 const BACKOFFS = [1000, 2000, 4000];
 
 export function useAutosave(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  pageId: string, // reserved for Task 11 — sessionStorage backup keyed by pageId
+  pageId: string,
   save: SaveFn,
 ) {
   const [status, setStatus] = useState<AutosaveStatus>("idle");
@@ -66,6 +65,11 @@ export function useAutosave(
         ref.current.retryCount = 0;
         setLastSavedAt(result.updatedAt);
         setStatus("saved");
+        if (typeof window !== "undefined") {
+          try {
+            sessionStorage.removeItem(`younest:autosave-pending:${pageId}`);
+          } catch {}
+        }
       }
     } else {
       if (ref.current.retryCount < BACKOFFS.length) {
@@ -93,11 +97,20 @@ export function useAutosave(
         setStatus("error");
       }
     }
-  }, [save]);
+  }, [save, pageId]);
 
   const schedule = useCallback(
     (content: unknown[] | null) => {
       ref.current.pending = content;
+      // beforeunload용 sessionStorage 백업 (PageBody의 sendBeacon이 읽음)
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem(
+            `younest:autosave-pending:${pageId}`,
+            JSON.stringify(content),
+          );
+        } catch {}
+      }
       // 새 입력 시 진행 중인 재시도 폐기 + retryCount 초기화 + 디바운스 재시작
       if (ref.current.retryTimer) {
         clearTimeout(ref.current.retryTimer);
@@ -112,7 +125,7 @@ export function useAutosave(
         void doSave();
       }, DEBOUNCE_MS);
     },
-    [doSave],
+    [doSave, pageId],
   );
 
   const flush = useCallback(async () => {
