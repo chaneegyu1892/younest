@@ -11,7 +11,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { createPage, renamePage, setPageIcon, toggleFavorite, movePage } from "@/lib/actions/pages";
+import { createPage, renamePage, setPageIcon, toggleFavorite, movePage, softDeletePage, restorePage } from "@/lib/actions/pages";
 import { getSessionUser } from "@/lib/auth/session";
 
 beforeEach(() => {
@@ -80,6 +80,24 @@ describe("movePage Zod", () => {
       "00000000-0000-0000-0000-000000000000",
       "not-uuid",
     );
+    expect(res.ok).toBe(false);
+  });
+});
+
+describe("softDeletePage Zod", () => {
+  it("uuid 아니면 reject", async () => {
+    const res = await softDeletePage("not-uuid");
+    expect(res.ok).toBe(false);
+  });
+});
+
+describe("restorePage Zod", () => {
+  it("빈 배열은 reject", async () => {
+    const res = await restorePage([]);
+    expect(res.ok).toBe(false);
+  });
+  it("uuid 아닌 ID 포함 시 reject", async () => {
+    const res = await restorePage(["not-uuid"]);
     expect(res.ok).toBe(false);
   });
 });

@@ -35,6 +35,8 @@ const setIconSchema = z.object({
 
 const idSchema = z.string().uuid();
 
+const restoreSchema = z.array(z.string().uuid()).min(1);
+
 // ─── 헬퍼 ────────────────────────────────────────────────────────────────────
 
 /** select 컬럼 목록 — PageNode와 1:1 대응 */
@@ -255,4 +257,50 @@ export async function movePage(
       position,
     },
   };
+}
+
+/**
+ * 페이지를 소프트 삭제한다 (휴지통 이동).
+ * - `soft_delete_page_cascade` RPC를 호출하여 하위 페이지까지 일괄 삭제
+ * - 반환값: 삭제된 모든 페이지 ID 목록
+ */
+export async function softDeletePage(
+  id: string,
+): Promise<ActionResult<{ deletedIds: string[] }>> {
+  const parsed = idSchema.safeParse(id);
+  if (!parsed.success) return { ok: false, error: "잘못된 페이지 ID입니다." };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("soft_delete_page_cascade", {
+    p_page_id: parsed.data,
+  });
+
+  if (error) return { ok: false, error: error.message };
+  const deletedIds = ((data ?? []) as { id: string }[]).map((r) => r.id);
+
+  revalidateAppLayout();
+  return { ok: true, data: { deletedIds } };
+}
+
+/**
+ * 휴지통에서 페이지를 복구한다.
+ * - ids: 복구할 페이지 UUID 목록 (최소 1개 필수)
+ * - deleted_at을 null로 설정하여 정상 상태로 복구
+ */
+export async function restorePage(
+  ids: string[],
+): Promise<ActionResult<{ restoredIds: string[] }>> {
+  const parsed = restoreSchema.safeParse(ids);
+  if (!parsed.success) return { ok: false, error: "복구할 페이지가 없습니다." };
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("pages")
+    .update({ deleted_at: null })
+    .in("id", parsed.data);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateAppLayout();
+  return { ok: true, data: { restoredIds: parsed.data } };
 }
