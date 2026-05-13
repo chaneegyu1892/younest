@@ -15,6 +15,7 @@ export interface PageNode {
   icon: string | null;
   is_favorite: boolean;
   position: number;
+  content: unknown[] | null;
   created_at: string;
   updated_at: string;
 }

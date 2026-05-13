@@ -16,6 +16,7 @@ function makeNode(
     icon: null,
     is_favorite: false,
     position: 0,
+    content: null,
     created_at: "2026-05-13T00:00:00Z",
     updated_at: "2026-05-13T00:00:00Z",
     ...extra,

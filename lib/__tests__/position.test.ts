@@ -12,6 +12,7 @@ function n(id: string, parent: string | null, pos: number): PageNode {
     icon: null,
     is_favorite: false,
     position: pos,
+    content: null,
     created_at: "",
     updated_at: "",
   };

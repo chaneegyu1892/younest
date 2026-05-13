@@ -7,7 +7,7 @@ import type { PageNode } from "@/lib/pages/types";
 function n(id: string, parent: string | null, title: string): PageNode {
   return {
     id, user_id: "u", parent_page_id: parent, type: "document",
-    title, icon: null, is_favorite: false, position: 0,
+    title, icon: null, is_favorite: false, position: 0, content: null,
     created_at: "", updated_at: "",
   };
 }

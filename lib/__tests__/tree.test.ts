@@ -16,6 +16,7 @@ function makeNode(id: string, parent: string | null, position = 0): PageNode {
     icon: null,
     is_favorite: false,
     position,
+    content: null,
     created_at: "2026-05-13T00:00:00Z",
     updated_at: "2026-05-13T00:00:00Z",
   };
