@@ -4,6 +4,8 @@ import { getSessionUser } from "@/lib/auth/session";
 import { fetchUserPages } from "@/lib/supabase/queries/pages";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { SidebarMobile } from "@/components/layout/SidebarMobile";
+import { SearchModalProvider } from "@/components/search/SearchModalProvider";
+import { SearchModalMount } from "@/components/search/SearchModalMount";
 
 export default async function AppLayout({
   children,
@@ -19,15 +21,18 @@ export default async function AppLayout({
   const pages = await fetchUserPages();
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar userName={user.nickname} pages={pages} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="border-b border-border bg-surface p-2 md:hidden">
-          <SidebarMobile userName={user.nickname} pages={pages} />
+    <SearchModalProvider>
+      <div className="flex min-h-screen bg-background">
+        <Sidebar userName={user.nickname} pages={pages} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="border-b border-border bg-surface p-2 md:hidden">
+            <SidebarMobile userName={user.nickname} pages={pages} />
+          </div>
+          <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <Toaster richColors closeButton />
       </div>
-      <Toaster richColors closeButton />
-    </div>
+      <SearchModalMount />
+    </SearchModalProvider>
   );
 }

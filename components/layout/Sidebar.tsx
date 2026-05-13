@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { PageNode } from "@/lib/pages/types";
 import { PageTree } from "./PageTree";
 import { EmptyPagesState } from "./EmptyPagesState";
+import { SearchTrigger } from "@/components/search/SearchTrigger";
 
 interface SidebarProps {
   userName: string;
@@ -29,13 +30,7 @@ export function Sidebar({ userName, pages }: SidebarProps) {
       </div>
 
       <div className="px-4 pb-4">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between rounded-md border border-border bg-surface px-3 py-2 text-left text-body text-text-secondary hover:bg-background"
-        >
-          <span>검색...</span>
-          <span className="text-caption text-text-tertiary">⌘K</span>
-        </button>
+        <SearchTrigger />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-2">
