@@ -9,16 +9,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import type { PageNode } from "@/lib/pages/types";
+import { PageTree } from "./PageTree";
+import { EmptyPagesState } from "./EmptyPagesState";
 
 interface SidebarMobileProps {
   userName: string;
+  pages: PageNode[];
 }
 
 /**
  * 모바일 사이드바 (md 미만에서만 표시).
  * 햄버거 버튼 클릭 → 좌측 Sheet로 사이드바 내용 표시.
+ * 풀 모바일 UX(즐겨찾기, 검색 등)는 T21에서 완성 예정.
  */
-export function SidebarMobile({ userName }: SidebarMobileProps) {
+export function SidebarMobile({ userName, pages }: SidebarMobileProps) {
+  const hasPages = pages.length > 0;
+
   return (
     <div className="flex items-center justify-between">
       <Sheet>
@@ -49,19 +56,13 @@ export function SidebarMobile({ userName }: SidebarMobileProps) {
           <nav className="flex-1 overflow-y-auto px-2 py-4">
             <div className="px-2 py-3">
               <h3 className="px-2 text-caption uppercase tracking-wider text-text-tertiary">
-                즐겨찾기
-              </h3>
-              <p className="mt-2 px-2 text-caption text-text-tertiary">
-                (M2에서 채움)
-              </p>
-            </div>
-            <div className="px-2 py-3">
-              <h3 className="px-2 text-caption uppercase tracking-wider text-text-tertiary">
                 내 페이지
               </h3>
-              <p className="mt-2 px-2 text-caption text-text-tertiary">
-                (M2에서 채움)
-              </p>
+              {hasPages ? (
+                <PageTree pages={pages} />
+              ) : (
+                <EmptyPagesState />
+              )}
             </div>
           </nav>
 

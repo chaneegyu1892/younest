@@ -12,10 +12,10 @@ export default function SidebarPocPage() {
 
   return (
     <div className="-m-6 flex min-h-screen bg-background">
-      <Sidebar userName={SAMPLE_USER} />
+      <Sidebar userName={SAMPLE_USER} pages={[]} />
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="border-b border-border bg-surface p-2 md:hidden">
-          <SidebarMobile userName={SAMPLE_USER} />
+          <SidebarMobile userName={SAMPLE_USER} pages={[]} />
         </div>
 
         <main className="flex-1 overflow-y-auto">
