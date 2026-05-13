@@ -11,7 +11,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { createPage, renamePage, setPageIcon, toggleFavorite, movePage, softDeletePage, restorePage } from "@/lib/actions/pages";
+import { createPage, renamePage, setPageIcon, toggleFavorite, movePage, softDeletePage, restorePage, moveSchema } from "@/lib/actions/pages";
 import { getSessionUser } from "@/lib/auth/session";
 
 beforeEach(() => {
@@ -81,6 +81,46 @@ describe("movePage Zod", () => {
       "not-uuid",
     );
     expect(res.ok).toBe(false);
+  });
+
+  it("newPosition은 음수도 허용 (맨 위 끼우기)", () => {
+    expect(
+      moveSchema.safeParse({
+        id: "11111111-1111-4111-8111-111111111111",
+        newParentId: null,
+        newPosition: -1.5,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("newPosition은 소수도 허용 (fractional)", () => {
+    expect(
+      moveSchema.safeParse({
+        id: "11111111-1111-4111-8111-111111111111",
+        newParentId: null,
+        newPosition: 2.5,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("newPosition은 Infinity reject", () => {
+    expect(
+      moveSchema.safeParse({
+        id: "11111111-1111-4111-8111-111111111111",
+        newParentId: null,
+        newPosition: Infinity,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("newPosition은 NaN reject", () => {
+    expect(
+      moveSchema.safeParse({
+        id: "11111111-1111-4111-8111-111111111111",
+        newParentId: null,
+        newPosition: NaN,
+      }).success,
+    ).toBe(false);
   });
 });
 

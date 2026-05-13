@@ -10,10 +10,10 @@ import type { ActionResult, PageNode } from "@/lib/pages/types";
 
 // ─── 스키마 ───────────────────────────────────────────────────────────────────
 
-const moveSchema = z.object({
+export const moveSchema = z.object({
   id: z.string().uuid(),
   newParentId: z.string().uuid().nullable(),
-  newPosition: z.number().int().nonnegative().optional(),
+  newPosition: z.number().finite().optional(),
 });
 
 const createSchema = z.object({
