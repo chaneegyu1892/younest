@@ -126,3 +126,25 @@ describe("M2.1 RLS — pages Server Action service-role 미사용", () => {
     );
   });
 });
+
+describe("M2.2 RLS — pages-content Server Action + REST endpoint service-role 미사용", () => {
+  it("lib/actions/pages-content.ts가 createSupabaseAdminClient 호출 없음", () => {
+    const content = readFileSync(
+      join(REPO_ROOT, "lib/actions/pages-content.ts"),
+      "utf-8",
+    );
+    expect(content, "service-role client는 어드민 영역에서만 사용해야 합니다").not.toMatch(
+      /createSupabaseAdminClient/,
+    );
+  });
+
+  it("app/api/pages/[id]/content/route.ts가 createSupabaseAdminClient 호출 없음", () => {
+    const content = readFileSync(
+      join(REPO_ROOT, "app/api/pages/[id]/content/route.ts"),
+      "utf-8",
+    );
+    expect(content, "REST endpoint도 service-role을 직접 사용하지 않아야 합니다").not.toMatch(
+      /createSupabaseAdminClient/,
+    );
+  });
+});
