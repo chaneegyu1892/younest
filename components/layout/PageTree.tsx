@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useOptimistic, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { buildTree } from "@/lib/pages/tree";
 import { reduceTree } from "@/lib/pages/reducer";
@@ -9,7 +10,7 @@ import {
   saveExpandedIds,
   toggleExpanded,
 } from "@/lib/pages/expanded-state";
-import { renamePage } from "@/lib/actions/pages";
+import { createPage, renamePage } from "@/lib/actions/pages";
 import type { PageNode, OptimisticMutation } from "@/lib/pages/types";
 import { PageTreeNode } from "./PageTreeNode";
 
@@ -24,6 +25,7 @@ interface Props {
  * - useOptimistic으로 이름 변경 낙관적 업데이트 지원
  */
 export function PageTree({ pages }: Props) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [optimistic, applyOptimistic] = useOptimistic(
     pages,
@@ -53,8 +55,37 @@ export function PageTree({ pages }: Props) {
     });
   };
 
+  /** 자식 페이지 생성 후 부모를 자동 펼침하고 새 페이지로 이동 */
+  const onAddChild = (parentId: string | null) => {
+    startTransition(async () => {
+      const res = await createPage({ parentPageId: parentId, type: "document" });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      // 자식 추가 시 부모를 자동 펼침
+      if (parentId) {
+        const next = new Set(expanded);
+        next.add(parentId);
+        setExpanded(next);
+        saveExpandedIds(next);
+      }
+      router.push(`/p/${res.data.id}`);
+    });
+  };
+
   return (
     <div className="space-y-px">
+      {/* 루트 페이지 추가 버튼 */}
+      <div className="mb-1 flex justify-end px-2">
+        <button
+          type="button"
+          onClick={() => onAddChild(null)}
+          className="rounded px-2 py-0.5 text-caption text-text-secondary hover:bg-background"
+        >
+          + 새 페이지
+        </button>
+      </div>
       {tree.map((node) => (
         <PageTreeNode
           key={node.id}
@@ -62,6 +93,7 @@ export function PageTree({ pages }: Props) {
           expanded={expanded}
           onToggleExpand={onToggle}
           onRename={onRename}
+          onAddChild={onAddChild}
         />
       ))}
     </div>

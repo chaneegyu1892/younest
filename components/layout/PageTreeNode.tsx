@@ -9,6 +9,7 @@ interface Props {
   expanded: ReadonlySet<string>;
   onToggleExpand: (id: string) => void;
   onRename: (id: string, title: string) => void;
+  onAddChild: (parentId: string) => void;
 }
 
 /**
@@ -24,6 +25,7 @@ export function PageTreeNode({
   expanded,
   onToggleExpand,
   onRename,
+  onAddChild,
 }: Props) {
   const isOpen = expanded.has(node.id);
   const hasChildren = node.children.length > 0;
@@ -90,6 +92,18 @@ export function PageTreeNode({
             {node.title || "제목 없음"}
           </Link>
         )}
+        {/* hover 시 노출되는 하위 페이지 추가 버튼 */}
+        <button
+          type="button"
+          aria-label="하위 페이지 추가"
+          onClick={(e) => {
+            e.preventDefault();
+            onAddChild(node.id);
+          }}
+          className="invisible h-5 w-5 rounded text-text-tertiary group-hover:visible hover:bg-surface"
+        >
+          +
+        </button>
       </div>
       {isOpen &&
         node.children.map((child) => (
@@ -99,6 +113,7 @@ export function PageTreeNode({
             expanded={expanded}
             onToggleExpand={onToggleExpand}
             onRename={onRename}
+            onAddChild={onAddChild}
           />
         ))}
     </div>
