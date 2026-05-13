@@ -21,8 +21,9 @@ export async function fetchUserPages(): Promise<PageNode[]> {
     .order("position", { ascending: true });
 
   if (error) throw error;
-  // @ts-expect-error — supabase postgrest-js 타입이 string literal select을 인식못함. 실제 스키마는 content 포함.
-  return (data ?? []) as PageNode[];
+  // string-variable select 시 postgrest-js가 row 타입 추론을 못해 PageNode와 구조 불일치.
+  // 런타임 shape은 PAGE_SELECT가 보장하므로 unknown 경유 캐스팅.
+  return (data ?? []) as unknown as PageNode[];
 }
 
 /**
