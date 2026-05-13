@@ -29,7 +29,7 @@ describe("reduceTree", () => {
       id: "a",
       title: "Hello",
     });
-    expect(out[0].title).toBe("Hello");
+    expect(out[0]!.title).toBe("Hello");
   });
 
   it("setIcon 변경 (null 가능)", () => {
@@ -37,7 +37,7 @@ describe("reduceTree", () => {
       [makeNode("a", null, { icon: "🌸" })],
       { kind: "setIcon", id: "a", icon: null },
     );
-    expect(out[0].icon).toBe(null);
+    expect(out[0]!.icon).toBe(null);
   });
 
   it("toggleFavorite", () => {
@@ -46,7 +46,7 @@ describe("reduceTree", () => {
       id: "a",
       is_favorite: true,
     });
-    expect(out[0].is_favorite).toBe(true);
+    expect(out[0]!.is_favorite).toBe(true);
   });
 
   it("create — 새 노드 추가", () => {
@@ -88,6 +88,6 @@ describe("reduceTree", () => {
   it("입력을 mutate하지 않음 (immutability)", () => {
     const input = [makeNode("a", null, { title: "old" })];
     reduceTree(input, { kind: "rename", id: "a", title: "new" });
-    expect(input[0].title).toBe("old");
+    expect(input[0]!.title).toBe("old");
   });
 });
