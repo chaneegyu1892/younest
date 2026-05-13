@@ -22,14 +22,15 @@ export function PageTreeNode({ node, expanded, onToggleExpand }: Props) {
   return (
     <div>
       <div
-        className="group flex items-center gap-1 rounded px-2 py-1 hover:bg-background"
+        className="group flex items-center gap-1 rounded py-1 pr-2 hover:bg-background"
         style={{ paddingLeft: `${8 + node.depth * 12}px` }}
       >
         <button
           type="button"
           aria-label={isOpen ? "접기" : "펼치기"}
-          onClick={() => onToggleExpand(node.id)}
-          className="h-4 w-4 text-text-tertiary"
+          onClick={() => hasChildren && onToggleExpand(node.id)}
+          disabled={!hasChildren}
+          className="h-4 w-4 text-text-tertiary disabled:cursor-default"
         >
           {hasChildren ? (isOpen ? "▾" : "▸") : "·"}
         </button>
