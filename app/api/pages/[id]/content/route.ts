@@ -38,7 +38,12 @@ export async function POST(
   });
 
   if (!res.ok) {
-    const status = res.error === "unauthorized" ? 401 : 400;
+    const status =
+      res.error === "unauthorized"
+        ? 401
+        : res.error === "save_failed"
+          ? 500
+          : 400;
     return NextResponse.json({ error: res.error }, { status });
   }
   return NextResponse.json({ ok: true, ...res.data });
