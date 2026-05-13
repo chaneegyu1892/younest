@@ -293,6 +293,8 @@ export type Database = {
       }
       pages: {
         Row: {
+          content: Json | null
+          content_encrypted: string | null
           cover_url: string | null
           created_at: string
           deleted_at: string | null
@@ -309,6 +311,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          content?: Json | null
+          content_encrypted?: string | null
           cover_url?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -325,6 +329,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          content?: Json | null
+          content_encrypted?: string | null
           cover_url?: string | null
           created_at?: string
           deleted_at?: string | null
