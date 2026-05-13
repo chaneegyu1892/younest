@@ -24,15 +24,18 @@ export const PageLinkBlock = createReactBlockSpec(
       if (!pageId) {
         return (
           <div
+            data-page-link-empty="true"
+            data-block-id={props.block.id}
             style={{
               padding: "0.5rem 0.75rem",
               borderRadius: "0.375rem",
               border: "1px dashed rgb(209 213 219)",
               color: "rgb(107 114 128)",
               fontSize: "0.875rem",
+              cursor: "pointer",
             }}
           >
-            페이지 링크: pageId 미지정
+            페이지 선택…
           </div>
         );
       }
