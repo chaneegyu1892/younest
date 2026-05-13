@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Toaster } from "sonner";
 import { getSessionUser } from "@/lib/auth/session";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { SidebarMobile } from "@/components/layout/SidebarMobile";
@@ -23,6 +24,7 @@ export default async function AppLayout({
         </div>
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+      <Toaster richColors closeButton />
     </div>
   );
 }
