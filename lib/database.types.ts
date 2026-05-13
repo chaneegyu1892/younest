@@ -398,7 +398,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      soft_delete_page_cascade: {
+        Args: { p_page_id: string }
+        Returns: {
+          id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
