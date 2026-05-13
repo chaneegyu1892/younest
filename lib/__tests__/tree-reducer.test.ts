@@ -20,6 +20,7 @@ function makeNode(
     content_text: null,
     created_at: "2026-05-13T00:00:00Z",
     updated_at: "2026-05-13T00:00:00Z",
+    deleted_at: null,
     ...extra,
   };
 }

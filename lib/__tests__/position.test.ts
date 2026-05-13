@@ -16,6 +16,7 @@ function n(id: string, parent: string | null, pos: number): PageNode {
     content_text: null,
     created_at: "",
     updated_at: "",
+    deleted_at: null,
   };
 }
 

@@ -19,6 +19,7 @@ export interface PageNode {
   content_text: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface PageTreeNode extends PageNode {

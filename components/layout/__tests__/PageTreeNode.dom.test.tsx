@@ -27,6 +27,7 @@ function makeNode(over: Partial<Node> = {}): Node {
     content_text: null,
     created_at: "",
     updated_at: "",
+    deleted_at: null,
     children: [],
     depth: 0,
     ...over,

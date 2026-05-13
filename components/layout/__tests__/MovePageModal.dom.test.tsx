@@ -10,6 +10,7 @@ function n(id: string, parent: string | null, title: string): PageNode {
     title, icon: null, is_favorite: false, position: 0, content: null,
     content_text: null,
     created_at: "", updated_at: "",
+    deleted_at: null,
   };
 }
 
