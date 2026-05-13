@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
 
 const REPO_ROOT = join(__dirname, "..", "..");
@@ -146,5 +146,23 @@ describe("M2.2 RLS — pages-content Server Action + REST endpoint service-role 
     expect(content, "REST endpoint도 service-role을 직접 사용하지 않아야 합니다").not.toMatch(
       /createSupabaseAdminClient/,
     );
+  });
+});
+
+describe("M2.3 search — lib/search/ service-role 미사용", () => {
+  const SEARCH_DIR = join(REPO_ROOT, "lib", "search");
+
+  it("lib/search/의 모든 .ts 파일이 createSupabaseAdminClient를 import하지 않음", () => {
+    const files = readdirSync(SEARCH_DIR).filter(
+      (f) => f.endsWith(".ts") || f.endsWith(".tsx"),
+    );
+    expect(files.length, "lib/search/ 디렉터리가 비어있으면 검증 의미 없음").toBeGreaterThan(0);
+
+    for (const f of files) {
+      const content = readFileSync(join(SEARCH_DIR, f), "utf-8");
+      expect(content, `${f}는 service-role client를 import하면 안 됩니다`).not.toMatch(
+        /createSupabaseAdminClient|SUPABASE_SERVICE_ROLE/,
+      );
+    }
   });
 });
