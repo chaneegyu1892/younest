@@ -107,11 +107,13 @@ export function PageTree({ pages }: Props) {
    * 성공 시 5초짜리 Undo 토스트를 띄운다.
    */
   const performDelete = (id: string) => {
-    // 현재 보고 있는 페이지가 삭제 대상이면 대시보드로 이동
-    if (pathname === `/p/${id}`) router.push("/dashboard");
+    const localIds = collectDescendantIds(optimistic, id);
+    // 현재 보고 있는 페이지가 삭제 대상(자기 또는 후손)이면 대시보드로 이동
+    if (localIds.some((did) => pathname === `/p/${did}`)) {
+      router.push("/dashboard");
+    }
 
     startTransition(async () => {
-      const localIds = collectDescendantIds(optimistic, id);
       applyOptimistic({ kind: "softDelete", deletedIds: localIds });
       const res = await softDeletePage(id);
       if (!res.ok) {
