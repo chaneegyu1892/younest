@@ -129,7 +129,32 @@ export async function deleteImages(
     await supabase.storage.from("images").remove(paths).catch(() => {});
   }
 
-  // 3. DB delete
+  // 3. 해당 이미지 URL을 참조하는 페이지 content에서 image 블록 제거
+  // (Storage delete 후, DB delete 전에 실행 — 페이지 정리는 best-effort)
+  const deletedUrls = new Set(
+    paths.map(
+      (p) => supabase.storage.from("images").getPublicUrl(p).data.publicUrl,
+    ),
+  );
+  if (deletedUrls.size > 0) {
+    const { data: pages } = await supabase
+      .from("pages")
+      .select("id, content")
+      .is("deleted_at", null)
+      .eq("user_id", me.id);
+    for (const page of pages ?? []) {
+      const { next, changed } = removeImageBlocks(page.content, deletedUrls);
+      if (changed) {
+        await supabase
+          .from("pages")
+          .update({ content: next as never })
+          .eq("id", page.id);
+        revalidatePath(`/p/${page.id}`);
+      }
+    }
+  }
+
+  // 4. DB delete
   const { error: delErr } = await supabase
     .from("images")
     .delete()
@@ -159,6 +184,39 @@ function extractImageUrls(content: unknown, into: Set<string>): void {
       extractImageUrls(block.children, into);
     }
   }
+}
+
+/**
+ * BlockNote content에서 deletedUrls 셋에 포함된 image 블록을 재귀 제거.
+ * children도 동일하게 가지치기. changed=true면 호출자가 UPDATE 필요.
+ */
+function removeImageBlocks(
+  content: unknown,
+  deletedUrls: Set<string>,
+): { next: unknown[]; changed: boolean } {
+  if (!Array.isArray(content)) return { next: [], changed: false };
+  let changed = false;
+  const next: unknown[] = [];
+  for (const block of content as BlockLike[]) {
+    if (
+      block?.type === "image" &&
+      typeof block.props?.url === "string" &&
+      deletedUrls.has(block.props.url)
+    ) {
+      changed = true;
+      continue; // skip = remove
+    }
+    if (Array.isArray(block?.children)) {
+      const childResult = removeImageBlocks(block.children, deletedUrls);
+      if (childResult.changed) {
+        changed = true;
+        next.push({ ...block, children: childResult.next });
+        continue;
+      }
+    }
+    next.push(block);
+  }
+  return { next, changed };
 }
 
 /**

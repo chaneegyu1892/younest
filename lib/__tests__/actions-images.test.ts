@@ -153,20 +153,44 @@ describe("deleteImages", () => {
 
   it("Storage .remove + DB delete 모두 호출 후 deletedCount 반환", async () => {
     const removeMock = vi.fn().mockResolvedValue({ data: [{}, {}], error: null });
-    const deleteInMock = vi.fn().mockResolvedValue({ data: null, error: null });
-    const deleteMock = vi.fn(() => ({ in: deleteInMock }));
-    const selectInMock = vi.fn().mockResolvedValue({
+    const dbDeleteInMock = vi.fn().mockResolvedValue({ data: null, error: null });
+    const dbDeleteMock = vi.fn(() => ({ in: dbDeleteInMock }));
+    const imagesSelectInMock = vi.fn().mockResolvedValue({
       data: [
         { storage_path: "u1/a.webp" },
         { storage_path: "u1/b.webp" },
       ],
       error: null,
     });
-    const selectMock = vi.fn(() => ({ in: selectInMock }));
+    const imagesSelectMock = vi.fn(() => ({ in: imagesSelectInMock }));
+
+    // pages 쿼리 — 이미지 참조 없는 페이지만 있어서 UPDATE 없음
+    const pagesEqMock = vi.fn().mockResolvedValue({ data: [], error: null });
+    const pagesIsMock = vi.fn(() => ({ eq: pagesEqMock }));
+    const pagesSelectMock = vi.fn(() => ({ is: pagesIsMock }));
+
+    let imagesCallCount = 0;
+    const fromMock = vi.fn((table: string) => {
+      if (table === "pages") {
+        return { select: pagesSelectMock };
+      }
+      imagesCallCount += 1;
+      if (imagesCallCount === 1) {
+        return { select: imagesSelectMock };
+      }
+      return { delete: dbDeleteMock };
+    });
 
     vi.mocked(createSupabaseServerClient).mockResolvedValue({
-      from: vi.fn(() => ({ select: selectMock, delete: deleteMock })),
-      storage: { from: () => ({ remove: removeMock }) },
+      from: fromMock,
+      storage: {
+        from: () => ({
+          remove: removeMock,
+          getPublicUrl: (p: string) => ({
+            data: { publicUrl: `https://example.com/${p}` },
+          }),
+        }),
+      },
     } as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>);
 
     const res = await deleteImages([
@@ -176,6 +200,83 @@ describe("deleteImages", () => {
     expect(res.ok).toBe(true);
     if (res.ok) expect(res.data.deletedCount).toBe(2);
     expect(removeMock).toHaveBeenCalledWith(["u1/a.webp", "u1/b.webp"]);
+  });
+
+  it("이미지를 참조하는 페이지 content에서 해당 image 블록 제거 + revalidate", async () => {
+    const { revalidatePath } = await import("next/cache");
+    const removeMock = vi.fn().mockResolvedValue({ data: [{}], error: null });
+    const dbDeleteInMock = vi.fn().mockResolvedValue({ data: null, error: null });
+    const dbDeleteMock = vi.fn(() => ({ in: dbDeleteInMock }));
+    const imagesSelectInMock = vi.fn().mockResolvedValue({
+      data: [{ storage_path: "u1/used.webp" }],
+      error: null,
+    });
+    const imagesSelectMock = vi.fn(() => ({ in: imagesSelectInMock }));
+
+    const pagesEqMock = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: "page-1",
+          content: [
+            { id: "b1", type: "paragraph" },
+            {
+              id: "b2",
+              type: "image",
+              props: { url: "https://example.com/u1/used.webp" },
+            },
+            { id: "b3", type: "paragraph" },
+          ],
+        },
+        {
+          id: "page-2",
+          content: [{ id: "b4", type: "paragraph" }], // no image
+        },
+      ],
+      error: null,
+    });
+    const pagesIsMock = vi.fn(() => ({ eq: pagesEqMock }));
+    const pagesSelectMock = vi.fn(() => ({ is: pagesIsMock }));
+    const pagesUpdateEqMock = vi.fn().mockResolvedValue({ data: null, error: null });
+    const pagesUpdateMock = vi.fn(() => ({ eq: pagesUpdateEqMock }));
+
+    let imagesCallCount = 0;
+    const fromMock = vi.fn((table: string) => {
+      if (table === "pages") {
+        return { select: pagesSelectMock, update: pagesUpdateMock };
+      }
+      // 'images' table — first call: SELECT (storage_path), second: DELETE
+      imagesCallCount += 1;
+      if (imagesCallCount === 1) {
+        return { select: imagesSelectMock };
+      }
+      return { delete: dbDeleteMock };
+    });
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      from: fromMock,
+      storage: {
+        from: () => ({
+          remove: removeMock,
+          getPublicUrl: (p: string) => ({
+            data: { publicUrl: `https://example.com/${p}` },
+          }),
+        }),
+      },
+    } as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>);
+
+    const res = await deleteImages([
+      "11111111-1111-4111-8111-aaaaaaaaaaaa",
+    ]);
+    expect(res.ok).toBe(true);
+    // page-1만 update — 이미지 블록 b2 제거된 새 content
+    expect(pagesUpdateMock).toHaveBeenCalledTimes(1);
+    const updateArg = (pagesUpdateMock.mock.calls[0] as unknown as [{ content: unknown[] }])[0];
+    expect(updateArg.content).toHaveLength(2);
+    expect(updateArg.content).toEqual([
+      { id: "b1", type: "paragraph" },
+      { id: "b3", type: "paragraph" },
+    ]);
+    expect(vi.mocked(revalidatePath)).toHaveBeenCalledWith("/p/page-1");
   });
 });
 
