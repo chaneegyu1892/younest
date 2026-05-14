@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { PageNode } from "@/lib/pages/types";
+import { escapeIlike } from "@/lib/search/escape";
 
 /**
  * 페이지 테이블에서 select할 컬럼들.
@@ -41,4 +42,33 @@ export async function fetchPage(pageId: string): Promise<PageNode | null> {
 
   if (error) throw error;
   return (data as PageNode | null) ?? null;
+}
+
+const MAX_TRASH_QUERY = 200;
+const TRASH_LIMIT = 200;
+
+/**
+ * 휴지통(deleted_at != null) 페이지 목록.
+ * q가 주어지면 title ILIKE 매칭. 200자 cut + 메타문자 escape.
+ * 정렬: deleted_at desc.
+ */
+export async function fetchDeletedPages(q?: string): Promise<PageNode[]> {
+  const supabase = await createSupabaseServerClient();
+  let query = supabase
+    .from("pages")
+    .select(PAGE_SELECT)
+    .not("deleted_at", "is", null);
+
+  const trimmed = (q ?? "").trim();
+  if (trimmed.length > 0) {
+    const escaped = escapeIlike(trimmed.slice(0, MAX_TRASH_QUERY));
+    query = query.ilike("title", `%${escaped}%`);
+  }
+
+  const { data, error } = await query
+    .order("deleted_at", { ascending: false })
+    .limit(TRASH_LIMIT);
+
+  if (error) throw error;
+  return (data ?? []) as unknown as PageNode[];
 }
