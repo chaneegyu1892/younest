@@ -72,3 +72,20 @@ export async function fetchDeletedPages(q?: string): Promise<PageNode[]> {
   if (error) throw error;
   return (data ?? []) as unknown as PageNode[];
 }
+
+/**
+ * 최근 수정된 페이지를 updated_at 내림차순으로 limit개 반환.
+ * 휴지통(deleted_at != null) 제외. RLS로 본인 페이지만 반환.
+ */
+export async function fetchRecentPages(limit: number): Promise<PageNode[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("pages")
+    .select(PAGE_SELECT)
+    .is("deleted_at", null)
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []) as unknown as PageNode[];
+}
