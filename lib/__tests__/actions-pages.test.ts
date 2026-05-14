@@ -11,7 +11,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { createPage, renamePage, setPageIcon, toggleFavorite, movePage, softDeletePage, restorePage, moveSchema } from "@/lib/actions/pages";
+import { createPage, renamePage, setPageIcon, toggleFavorite, movePage, softDeletePage, restorePage } from "@/lib/actions/pages";
+import { moveSchema } from "@/lib/actions/pages-schemas";
 import { getSessionUser } from "@/lib/auth/session";
 
 beforeEach(() => {

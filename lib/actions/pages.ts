@@ -7,14 +7,9 @@ import { getSessionUser } from "@/lib/auth/session";
 import { nextPosition } from "@/lib/pages/position";
 import { isDescendant } from "@/lib/pages/tree";
 import type { ActionResult, PageNode } from "@/lib/pages/types";
+import { moveSchema } from "./pages-schemas";
 
 // ─── 스키마 ───────────────────────────────────────────────────────────────────
-
-export const moveSchema = z.object({
-  id: z.string().uuid(),
-  newParentId: z.string().uuid().nullable(),
-  newPosition: z.number().finite().optional(),
-});
 
 const createSchema = z.object({
   parentPageId: z.string().uuid().nullable(),
