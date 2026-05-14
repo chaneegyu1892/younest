@@ -32,6 +32,8 @@ const idSchema = z.string().uuid();
 
 const restoreSchema = z.array(z.string().uuid()).min(1);
 
+const hardDeleteSchema = z.array(z.string().uuid()).min(1);
+
 // ─── 헬퍼 ────────────────────────────────────────────────────────────────────
 
 /** select 컬럼 목록 — PageNode와 1:1 대응 */
@@ -298,4 +300,27 @@ export async function restorePage(
 
   revalidateAppLayout();
   return { ok: true, data: { restoredIds: parsed.data } };
+}
+
+/**
+ * 휴지통(deleted_at != null) 페이지를 영구 삭제한다.
+ * hard_delete_pages RPC 호출 — user_id = auth.uid() + deleted_at is not null 이중 가드.
+ */
+export async function hardDeletePages(
+  ids: string[],
+): Promise<ActionResult<{ deletedCount: number }>> {
+  const me = await getSessionUser();
+  if (!me) return { ok: false, error: "로그인이 필요합니다." };
+
+  const parsed = hardDeleteSchema.safeParse(ids);
+  if (!parsed.success) return { ok: false, error: "잘못된 입력입니다." };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("hard_delete_pages", {
+    p_ids: parsed.data,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/trash");
+  return { ok: true, data: { deletedCount: data ?? 0 } };
 }
