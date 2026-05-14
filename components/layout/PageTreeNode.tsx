@@ -144,7 +144,7 @@ export function PageTreeNode({
           aria-label={isOpen ? "접기" : "펼치기"}
           onClick={() => hasChildren && onToggleExpand(node.id)}
           disabled={!hasChildren}
-          className="h-4 w-4 text-text-tertiary disabled:cursor-default"
+          className="flex h-4 w-4 items-center justify-center text-[10px] leading-none text-text-tertiary disabled:cursor-default"
         >
           {hasChildren ? (isOpen ? "▾" : "▸") : ""}
         </button>
