@@ -21,8 +21,8 @@ const META: Record<z.infer<typeof templateSchema>, TemplateMeta> = {
   memo: {
     label: "메모",
     icon: "📝",
-    childTitle: (n) => `${n.toISOString().slice(0, 10)} ${n.toISOString().slice(11, 16)}`,
-    dedupByTitle: false,
+    childTitle: (n) => n.toISOString().slice(0, 10),
+    dedupByTitle: true,
   },
   diary: {
     label: "일기",
@@ -33,8 +33,8 @@ const META: Record<z.infer<typeof templateSchema>, TemplateMeta> = {
   prayer: {
     label: "기도제목",
     icon: "🙏",
-    childTitle: (n) => `${n.toISOString().slice(0, 10)} ${n.toISOString().slice(11, 16)}`,
-    dedupByTitle: false,
+    childTitle: (n) => n.toISOString().slice(0, 10),
+    dedupByTitle: true,
   },
 };
 
