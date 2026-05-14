@@ -3,6 +3,8 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 const WEEK = 7 * DAY;
 
+// numeric: "always" — "auto"는 "1주 전" 대신 "지난주", "1일 전" 대신 "어제"로 출력해
+// 다른 단위와 일관성이 깨진다. 모든 단위에서 "N분/시간/일/주 전" 형식 유지.
 const rtf = new Intl.RelativeTimeFormat("ko", { numeric: "always" });
 const dtf = new Intl.DateTimeFormat("ko", { dateStyle: "medium" });
 
