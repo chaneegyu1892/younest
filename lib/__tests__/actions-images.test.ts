@@ -67,6 +67,8 @@ describe("getStorageUsage", () => {
   });
 });
 
+import { deleteImages, listOrphanImages } from "@/lib/actions/images";
+
 describe("recordImage", () => {
   it("storagePath 형식 잘못되면 reject", async () => {
     const res = await recordImage({
@@ -139,6 +141,93 @@ describe("recordImage", () => {
     if (res.ok) {
       expect(res.data.id).toBe("11111111-1111-4111-8111-aaaaaaaaaaaa");
       expect(res.data.url).toBe("https://example.com/u1/abc.webp");
+    }
+  });
+});
+
+describe("deleteImages", () => {
+  it("ids 빈 배열은 reject", async () => {
+    const res = await deleteImages([]);
+    expect(res.ok).toBe(false);
+  });
+
+  it("Storage .remove + DB delete 모두 호출 후 deletedCount 반환", async () => {
+    const removeMock = vi.fn().mockResolvedValue({ data: [{}, {}], error: null });
+    const deleteInMock = vi.fn().mockResolvedValue({ data: null, error: null });
+    const deleteMock = vi.fn(() => ({ in: deleteInMock }));
+    const selectInMock = vi.fn().mockResolvedValue({
+      data: [
+        { storage_path: "u1/a.webp" },
+        { storage_path: "u1/b.webp" },
+      ],
+      error: null,
+    });
+    const selectMock = vi.fn(() => ({ in: selectInMock }));
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      from: vi.fn(() => ({ select: selectMock, delete: deleteMock })),
+      storage: { from: () => ({ remove: removeMock }) },
+    } as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>);
+
+    const res = await deleteImages([
+      "11111111-1111-4111-8111-aaaaaaaaaaaa",
+      "22222222-2222-4222-8222-bbbbbbbbbbbb",
+    ]);
+    expect(res.ok).toBe(true);
+    if (res.ok) expect(res.data.deletedCount).toBe(2);
+    expect(removeMock).toHaveBeenCalledWith(["u1/a.webp", "u1/b.webp"]);
+  });
+});
+
+describe("listOrphanImages", () => {
+  it("페이지 content에 있는 image src는 orphan에서 제외", async () => {
+    const usedUrl = "https://example.com/u1/used.webp";
+    const pagesEqMock = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: "page-1",
+          content: [
+            {
+              type: "image",
+              props: { url: usedUrl },
+            },
+          ],
+        },
+      ],
+      error: null,
+    });
+    const pagesIsMock = vi.fn(() => ({ eq: pagesEqMock }));
+    const pagesSelectMock = vi.fn(() => ({ is: pagesIsMock }));
+
+    const imagesEqMock = vi.fn().mockResolvedValue({
+      data: [
+        { id: "img-used", storage_path: "u1/used.webp" },
+        { id: "img-orphan", storage_path: "u1/orphan.webp" },
+      ],
+      error: null,
+    });
+    const imagesSelectMock = vi.fn(() => ({ eq: imagesEqMock }));
+
+    const fromMock = vi.fn((table: string) => {
+      if (table === "pages") return { select: pagesSelectMock };
+      return { select: imagesSelectMock };
+    });
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      from: fromMock,
+      storage: {
+        from: () => ({
+          getPublicUrl: (path: string) => ({
+            data: { publicUrl: `https://example.com/${path}` },
+          }),
+        }),
+      },
+    } as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>);
+
+    const res = await listOrphanImages();
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.data.ids).toEqual(["img-orphan"]);
     }
   });
 });
