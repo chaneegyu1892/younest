@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { SidebarMobile } from "@/components/layout/SidebarMobile";
 import { SearchModalProvider } from "@/components/search/SearchModalProvider";
 import { SearchModalMount } from "@/components/search/SearchModalMount";
+import { QuotaExceededModalMount } from "@/components/storage/QuotaExceededModalMount";
 
 export default async function AppLayout({
   children,
@@ -33,6 +34,7 @@ export default async function AppLayout({
         <Toaster richColors closeButton />
       </div>
       <SearchModalMount />
+      <QuotaExceededModalMount />
     </SearchModalProvider>
   );
 }
