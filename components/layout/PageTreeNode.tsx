@@ -128,9 +128,16 @@ export function PageTreeNode({
           aria-label="드래그 핸들"
           {...attributes}
           {...listeners}
-          className="invisible h-4 w-3 cursor-grab text-text-tertiary group-hover:visible"
+          className="invisible flex h-5 w-4 flex-shrink-0 cursor-grab items-center justify-center text-text-secondary group-hover:visible"
         >
-          ⋮⋮
+          <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden>
+            <circle cx="2.5" cy="2.5" r="1.2" />
+            <circle cx="7.5" cy="2.5" r="1.2" />
+            <circle cx="2.5" cy="7" r="1.2" />
+            <circle cx="7.5" cy="7" r="1.2" />
+            <circle cx="2.5" cy="11.5" r="1.2" />
+            <circle cx="7.5" cy="11.5" r="1.2" />
+          </svg>
         </button>
         <button
           type="button"
