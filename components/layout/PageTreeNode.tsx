@@ -146,7 +146,7 @@ export function PageTreeNode({
           disabled={!hasChildren}
           className="h-4 w-4 text-text-tertiary disabled:cursor-default"
         >
-          {hasChildren ? (isOpen ? "▾" : "▸") : "·"}
+          {hasChildren ? (isOpen ? "▾" : "▸") : ""}
         </button>
         <span className="w-4 text-center">{node.icon ?? "📄"}</span>
         {editing ? (
