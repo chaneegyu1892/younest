@@ -144,9 +144,24 @@ export function PageTreeNode({
           aria-label={isOpen ? "접기" : "펼치기"}
           onClick={() => hasChildren && onToggleExpand(node.id)}
           disabled={!hasChildren}
-          className="flex h-4 w-4 items-center justify-center text-[10px] leading-none text-text-tertiary disabled:cursor-default"
+          className="flex h-5 w-5 items-center justify-center rounded text-text-secondary transition-transform hover:bg-background disabled:invisible disabled:cursor-default"
+          style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
         >
-          {hasChildren ? (isOpen ? "▾" : "▸") : ""}
+          {hasChildren && (
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <polyline points="4.5 3 8 6 4.5 9" />
+            </svg>
+          )}
         </button>
         <span className="mr-1 w-4 text-center">{node.icon ?? "📄"}</span>
         {editing ? (
