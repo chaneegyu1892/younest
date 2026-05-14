@@ -13,6 +13,7 @@ _여기 모이는 항목들이 sweep 대상_
 
 - [ ] **`<time>` `dateTime` 속성** — `components/dashboard/RecentWidget.tsx`의 `<time>`에 `dateTime={p.updated_at}` 추가. 스크린리더/머신 파서용 (M3.1, 2026-05-14 메모)
 - [ ] **`<section>` accessible name** — 대시보드 위젯 3개 `<section>`에 `aria-labelledby` 추가 (각각 h2 id 가리키게). 랜드마크 노출용 (M3.1, 2026-05-14 메모)
+- [ ] **QuotaExceededModal a11y** — `role="dialog"` + `aria-modal="true"` + Escape 키 핸들러 추가 (M3.2, 2026-05-14 메모)
 
 <!--
 포맷 예시:
