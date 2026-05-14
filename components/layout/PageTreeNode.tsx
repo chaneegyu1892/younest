@@ -148,7 +148,7 @@ export function PageTreeNode({
         >
           {hasChildren ? (isOpen ? "▾" : "▸") : ""}
         </button>
-        <span className="w-4 text-center">{node.icon ?? "📄"}</span>
+        <span className="mr-1 w-4 text-center">{node.icon ?? "📄"}</span>
         {editing ? (
           <input
             autoFocus
