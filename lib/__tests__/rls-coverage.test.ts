@@ -166,3 +166,47 @@ describe("M2.3 search — lib/search/ service-role 미사용", () => {
     }
   });
 });
+
+describe("M3.2 images — Server Action service-role 미사용", () => {
+  it("lib/actions/images.ts가 createSupabaseAdminClient 호출 없음", () => {
+    const content = readFileSync(
+      join(REPO_ROOT, "lib/actions/images.ts"),
+      "utf-8",
+    );
+    expect(content, "service-role client는 어드민 영역에서만 사용해야 합니다").not.toMatch(
+      /createSupabaseAdminClient|SUPABASE_SERVICE_ROLE/,
+    );
+  });
+
+  it("lib/images/upload-handler.ts가 service-role 미사용", () => {
+    const content = readFileSync(
+      join(REPO_ROOT, "lib/images/upload-handler.ts"),
+      "utf-8",
+    );
+    expect(content).not.toMatch(/createSupabaseAdminClient|SUPABASE_SERVICE_ROLE/);
+  });
+
+  it("lib/supabase/queries/images.ts가 service-role 미사용", () => {
+    const content = readFileSync(
+      join(REPO_ROOT, "lib/supabase/queries/images.ts"),
+      "utf-8",
+    );
+    expect(content).not.toMatch(/createSupabaseAdminClient|SUPABASE_SERVICE_ROLE/);
+  });
+});
+
+describe("M3.2 storage — bucket 마이그레이션 정적 검증", () => {
+  const STORAGE_SQL = readFileSync(
+    join(REPO_ROOT, "supabase/migrations/20260514020000_storage_images_bucket.sql"),
+    "utf-8",
+  );
+
+  it("'images' bucket 생성", () => {
+    expect(STORAGE_SQL).toMatch(/insert\s+into\s+storage\.buckets[\s\S]+?'images'/i);
+  });
+
+  it("INSERT/UPDATE/DELETE 정책에 auth.uid() 폴더 매칭 포함", () => {
+    expect(STORAGE_SQL).toMatch(/storage\.foldername\(name\)\)\[1\]/);
+    expect(STORAGE_SQL).toMatch(/auth\.uid\(\)::text/);
+  });
+});
