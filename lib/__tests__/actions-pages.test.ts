@@ -14,6 +14,7 @@ vi.mock("next/cache", () => ({
 import { createPage, renamePage, setPageIcon, toggleFavorite, movePage, softDeletePage, restorePage } from "@/lib/actions/pages";
 import { moveSchema } from "@/lib/actions/pages-schemas";
 import { getSessionUser } from "@/lib/auth/session";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -39,6 +40,53 @@ describe("createPage Zod", () => {
       title: "x".repeat(201),
     });
     expect(res.ok).toBe(false);
+  });
+
+  it("icon이 16자 초과면 reject", async () => {
+    const res = await createPage({
+      parentPageId: null,
+      type: "document",
+      title: "메모",
+      icon: "x".repeat(17),
+    });
+    expect(res.ok).toBe(false);
+  });
+
+  it("icon이 16자 이내면 schema 통과 (DB 호출은 mock fail이지만 Zod는 통과)", async () => {
+    // Supabase 모킹: 체인 메서드 전부 처리
+    const chainMethods = {
+      is: vi.fn().mockReturnValue({
+        is: vi.fn().mockResolvedValue({ data: null }),
+        eq: vi.fn().mockResolvedValue({ data: null }),
+      }),
+      eq: vi.fn().mockResolvedValue({ data: null }),
+    };
+    const mockSelectChain = {
+      is: vi.fn().mockReturnValue(chainMethods),
+      eq: vi.fn().mockReturnValue(chainMethods),
+    };
+    const mockInsertSelectChain = {
+      single: vi.fn().mockResolvedValue({ data: null, error: { message: "Insert failed" } }),
+    };
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue(mockSelectChain),
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue(mockInsertSelectChain),
+        }),
+      }),
+    } as never);
+
+    const res = await createPage({
+      parentPageId: null,
+      type: "document",
+      title: "메모",
+      icon: "📝",
+    });
+    if (!res.ok) {
+      expect(res.error).not.toBe("잘못된 입력입니다.");
+    }
   });
 });
 

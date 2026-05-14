@@ -15,6 +15,8 @@ const createSchema = z.object({
   parentPageId: z.string().uuid().nullable(),
   type: z.literal("document"),
   title: z.string().max(200).optional(),
+  // 이모지 한 글자는 보통 ≤ 16 UTF-16 code units (setIconSchema와 동일 한계)
+  icon: z.string().max(16).nullable().optional(),
 });
 
 const renameSchema = z.object({
@@ -56,6 +58,7 @@ export async function createPage(input: {
   parentPageId: string | null;
   type: "document";
   title?: string;
+  icon?: string | null;
 }): Promise<ActionResult<PageNode>> {
   // Zod 검증
   const parsed = createSchema.safeParse(input);
@@ -89,6 +92,7 @@ export async function createPage(input: {
       parent_page_id: parsed.data.parentPageId,
       type: "document",
       title: parsed.data.title ?? null,
+      icon: parsed.data.icon ?? null,
       position,
     })
     .select(PAGE_SELECT)
