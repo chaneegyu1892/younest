@@ -15,6 +15,7 @@ import { SaveStatusBadge } from "@/components/editor/SaveStatusBadge";
 import { PageLinkPickerModal, type PickerPage } from "@/components/editor/PageLinkPickerModal";
 import { getSlashMenuItems } from "@/components/editor/slash-menu";
 import { updatePageContent } from "@/lib/actions/pages-content";
+import { createUploadFileHandler } from "@/lib/images/upload-handler";
 import type { Json } from "@/lib/database.types";
 
 interface Props {
@@ -33,6 +34,7 @@ export function BlockNoteEditor({ pageId, initialContent, availablePages }: Prop
   const editor = useCreateBlockNote({
     schema,
     initialContent: initial as never,
+    uploadFile: createUploadFileHandler(pageId) as never,
   });
 
   const save: SaveFn = useCallback(
