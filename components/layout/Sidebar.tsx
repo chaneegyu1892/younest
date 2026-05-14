@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PageNode } from "@/lib/pages/types";
-import { PageTree } from "./PageTree";
+import { PageTreeMount } from "./PageTreeMount";
 import { EmptyPagesState } from "./EmptyPagesState";
 import { SearchTrigger } from "@/components/search/SearchTrigger";
 
@@ -58,7 +58,7 @@ export function Sidebar({ userName, pages }: SidebarProps) {
           <h3 className="px-2 text-caption uppercase tracking-wider text-text-tertiary">
             내 페이지
           </h3>
-          {hasPages ? <PageTree pages={pages} /> : <EmptyPagesState />}
+          {hasPages ? <PageTreeMount pages={pages} /> : <EmptyPagesState />}
         </div>
       </nav>
 
